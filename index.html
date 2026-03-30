@@ -271,6 +271,7 @@ body{background:var(--bg);color:var(--cream);font-family:'DotGothic16',monospace
           <span style="font-size:10px;color:var(--gray);" id="tr-age-weight">18歳 110kg</span>
         </div>
         <div class="name-hist" id="tr-name-hist"></div>
+        <div id="tr-extra" style="margin:2px 0 5px;min-height:16px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;"></div>
         <div class="sbar"><span class="sbar-l">体力HP</span><div class="sbar-bg"><div class="sbar-f fc-hp" id="bar-hp"></div></div><span class="sbar-v" id="val-hp">-</span></div>
         <div class="sbar"><span class="sbar-l">やる気</span><div class="sbar-bg"><div class="sbar-f fc-mot" id="bar-mot"></div></div><span class="sbar-v" id="val-mot">-</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:3px;">
@@ -576,6 +577,7 @@ function newDisciple(name,skinColor,faceType,bodyType,personality,isGenerated=fa
     promotedSanyaku:false,
     promotedOzeki:false,
     retired:false,
+    yushoRecord:[],
   };
 }
 
@@ -620,6 +622,7 @@ function loadGame(){
           if(d.promotedJuryo==null) d.promotedJuryo=d.rank>=4;
           if(d.promotedSanyaku==null) d.promotedSanyaku=d.rank>=6;
           if(d.promotedOzeki==null) d.promotedOzeki=d.rank>=8;
+          if(!d.yushoRecord) d.yushoRecord=[];
         });
       }
       return true;
@@ -672,6 +675,16 @@ function getSkin(d){return SKINS.find(s=>s.id===d.skinColor)||SKINS[0];}
 // ================================================================
 //  CHARACTER RENDERER (inline SVG – 200×260 / 100×130)
 // ================================================================
+function getTokuiWaza(d){
+  const sv={str:d.str,end:d.end,tec:d.tec,men:d.men};
+  const maxV=Math.max(sv.str,sv.end,sv.tec,sv.men);
+  const gap=40;
+  if(sv.str===maxV&&sv.str>=sv.tec+gap) return {name:'押し相撲',icon:'💪',col:'#8b1a1a'};
+  if(sv.tec===maxV&&sv.tec>=sv.str+gap) return {name:'技巧派',icon:'🎯',col:'#1a4a8a'};
+  if(sv.men===maxV&&sv.men>=sv.end+gap) return {name:'精神力型',icon:'🔥',col:'#5a1a7a'};
+  if(sv.end===maxV&&sv.end>=sv.men+gap) return {name:'粘り腰',icon:'🛡️',col:'#1a5a2a'};
+  return {name:'バランス型',icon:'⚖️',col:'#6b5a3a'};
+}
 function renderChar(d, size='lg'){
   const sm=size==='sm';
   const W=sm?100:200, H=sm?130:260;
@@ -690,6 +703,7 @@ function renderChar(d, size='lg'){
   const isKanto=d.rank>=4;
   const isYoko=d.rank>=9;
   const face=d.faceType||'round';
+  const pers=d.personality||'earnest';
 
   // Body width by weight tiers
   const bW=w<90?s(56):w<130?s(76):w<170?s(96):s(116);
@@ -702,7 +716,7 @@ function renderChar(d, size='lg'){
 
   // Leg dimensions
   const lgW=w<90?s(19):w<130?s(23):s(27);
-  const lgGap=s(7);
+  const lgGap=s(16); // wide shiko stance
 
   const mawCol=isYoko?'#D4A800':isKanto?'#9B1B30':'#2A3A5C';
 
@@ -742,10 +756,25 @@ function renderChar(d, size='lg'){
   const eyeY=headY+hH*0.44;
   const eOX=s(face==='baby'?8:10);
   if(!sm){
-    // Eyebrows
+    // 眉毛（性格別）
     const bY=eyeY-s(8);
-    v+=`<line x1="${CX-eOX-s(4)}" y1="${bY+s(2)}" x2="${CX-eOX+s(5)}" y2="${bY}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
-    v+=`<line x1="${CX+eOX-s(5)}" y1="${bY}" x2="${CX+eOX+s(4)}" y2="${bY+s(2)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+    if(pers==='mental'){
+      // 精神：険しい眉（闘志）
+      v+=`<line x1="${CX-eOX-s(6)}" y1="${bY+s(4)}" x2="${CX-eOX+s(5)}" y2="${bY}" stroke="#2a1a08" stroke-width="${s(4)}" stroke-linecap="round"/>`;
+      v+=`<line x1="${CX+eOX-s(5)}" y1="${bY}" x2="${CX+eOX+s(6)}" y2="${bY+s(4)}" stroke="#2a1a08" stroke-width="${s(4)}" stroke-linecap="round"/>`;
+    } else if(pers==='genius'){
+      // 天才：片眉上げ（余裕）
+      v+=`<line x1="${CX-eOX-s(5)}" y1="${bY+s(2)}" x2="${CX-eOX+s(5)}" y2="${bY+s(2)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+      v+=`<line x1="${CX+eOX-s(5)}" y1="${bY-s(2)}" x2="${CX+eOX+s(5)}" y2="${bY+s(1)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+    } else if(pers==='quick'){
+      // 技巧：平ら眉（クール）
+      v+=`<line x1="${CX-eOX-s(5)}" y1="${bY+s(1)}" x2="${CX-eOX+s(5)}" y2="${bY+s(1)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+      v+=`<line x1="${CX+eOX-s(5)}" y1="${bY+s(1)}" x2="${CX+eOX+s(5)}" y2="${bY+s(1)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+    } else {
+      // 努力家：やや角ばった眉（真剣）
+      v+=`<line x1="${CX-eOX-s(4)}" y1="${bY+s(2)}" x2="${CX-eOX+s(5)}" y2="${bY}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+      v+=`<line x1="${CX+eOX-s(5)}" y1="${bY}" x2="${CX+eOX+s(4)}" y2="${bY+s(2)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+    }
   }
   // Eyes
   const eRx=sm?s(4):s(5), eRy=isLowHp?(sm?s(1):s(2)):sm?s(3):s(4);
@@ -754,9 +783,21 @@ function renderChar(d, size='lg'){
   v+=`<circle cx="${CX-eOX}" cy="${eyeY}" r="${sm?s(2):s(3)}" fill="#1a1210"/>`;
   v+=`<circle cx="${CX+eOX}" cy="${eyeY}" r="${sm?s(2):s(3)}" fill="#1a1210"/>`;
   if(!sm) v+=`<ellipse cx="${CX}" cy="${eyeY+s(9)}" rx="${s(3)}" ry="${s(2)}" fill="${skd}" opacity="0.6"/>`;
-  // Mouth arc
+  // 口（性格別・低HP時は不満顔）
   const mY2=headY+hH*0.73, mHW=sm?s(7):s(13);
-  v+=`<path d="M${CX-mHW},${mY2} Q${CX},${mY2+s(sm?2:4)} ${CX+mHW},${mY2}" fill="none" stroke="#7a4030" stroke-width="${sm?1.5:2}" stroke-linecap="round"/>`;
+  let mouthD;
+  if(isLowHp){
+    mouthD=`M${CX-mHW},${mY2+s(2)} Q${CX},${mY2-s(2)} ${CX+mHW},${mY2+s(2)}`; // しんどい
+  } else if(pers==='mental'){
+    mouthD=`M${CX-mHW},${mY2+s(2)} Q${CX},${mY2-s(1)} ${CX+mHW},${mY2+s(2)}`; // 険しい口元
+  } else if(pers==='genius'){
+    mouthD=`M${CX-mHW},${mY2+s(1)} Q${CX+s(sm?4:8)},${mY2+s(sm?4:6)} ${CX+mHW},${mY2-s(1)}`; // 余裕の笑み
+  } else if(pers==='quick'){
+    mouthD=`M${CX-mHW},${mY2} Q${CX},${mY2+s(sm?5:8)} ${CX+mHW},${mY2}`; // 爽やかな笑顔
+  } else {
+    mouthD=`M${CX-mHW},${mY2} Q${CX},${mY2+s(sm?2:4)} ${CX+mHW},${mY2}`; // 努力家の真剣さ
+  }
+  v+=`<path d="${mouthD}" fill="none" stroke="#7a4030" stroke-width="${sm?1.5:2}" stroke-linecap="round"/>`;
   // Cheeks
   if(!sm&&(face==='baby'||w>=140)){
     v+=`<ellipse cx="${CX-eOX-s(4)}" cy="${eyeY+s(7)}" rx="${s(9)}" ry="${s(5)}" fill="rgba(220,90,80,0.2)"/>`;
@@ -769,17 +810,22 @@ function renderChar(d, size='lg'){
   // ── Shoulders ──
   v+=`<rect x="${CX-shW/2}" y="${torsoY}" width="${shW}" height="${s(9)}" rx="${s(5)}" fill="${skin}"/>`;
 
-  // ── Arms (upper + forearm) ──
+  // ── Arms (上腕を外側に、前腕を内側に向けた構え姿勢) ──
   const aY=torsoY+s(4);
   const aH=s(36), faH=s(26);
-  v+=`<rect x="${CX-shW/2-aW}" y="${aY}" width="${aW}" height="${aH}" rx="${s(4)}" fill="${skin}"/>`;
-  v+=`<rect x="${CX-shW/2-faW+s(2)}" y="${aY+aH}" width="${faW}" height="${faH}" rx="${s(4)}" fill="${skin}"/>`;
-  v+=`<rect x="${CX+shW/2}" y="${aY}" width="${aW}" height="${aH}" rx="${s(4)}" fill="${skin}"/>`;
-  v+=`<rect x="${CX+shW/2-s(2)}" y="${aY+aH}" width="${faW}" height="${faH}" rx="${s(4)}" fill="${skin}"/>`;
-  // Injury taping
+  const aOff=s(10); // 肘での外開き量
+  // 左上腕（外側へ張る）
+  v+=`<polygon points="${CX-shW/2},${aY} ${CX-shW/2-aW},${aY} ${CX-shW/2-aW-aOff},${aY+aH} ${CX-shW/2-aOff/2|0},${aY+aH}" fill="${skin}"/>`;
+  // 左前腕（内側へ戻す）
+  v+=`<polygon points="${CX-shW/2-aW-aOff},${aY+aH} ${CX-shW/2-aOff/2|0},${aY+aH} ${CX-shW/2-s(3)},${aY+aH+faH} ${CX-shW/2-faW-aOff+s(6)},${aY+aH+faH}" fill="${skin}"/>`;
+  // 右上腕（外側へ張る）
+  v+=`<polygon points="${CX+shW/2+aW},${aY} ${CX+shW/2},${aY} ${CX+shW/2+aOff/2|0},${aY+aH} ${CX+shW/2+aW+aOff},${aY+aH}" fill="${skin}"/>`;
+  // 右前腕（内側へ戻す）
+  v+=`<polygon points="${CX+shW/2+aOff/2|0},${aY+aH} ${CX+shW/2+aW+aOff},${aY+aH} ${CX+shW/2+faW+aOff-s(6)},${aY+aH+faH} ${CX+shW/2+s(3)},${aY+aH+faH}" fill="${skin}"/>`;
+  // 怪我テーピング
   if(hasInj&&!sm){
-    const tY=aY+Math.round(aH*0.4);
-    v+=`<rect x="${CX-shW/2-aW-1}" y="${tY}" width="${aW+2}" height="${s(6)}" rx="${s(2)}" fill="rgba(255,255,220,0.92)" stroke="#c0b890" stroke-width="0.8"/>`;
+    const tY=aY+Math.round(aH*0.3);
+    v+=`<rect x="${(CX-shW/2-aW-aOff*0.5)|0}" y="${tY}" width="${aW+aOff*0.4|0}" height="${s(6)}" rx="${s(2)}" fill="rgba(255,255,220,0.92)" stroke="#c0b890" stroke-width="0.8"/>`;
   }
 
   // ── Torso ──
@@ -813,12 +859,16 @@ function renderChar(d, size='lg'){
     }
   }
 
-  // ── Legs ──
-  v+=`<rect x="${CX-lgGap-lgW}" y="${legY}" width="${lgW}" height="${s(32)}" rx="${s(4)}" fill="${skin}"/>`;
-  v+=`<rect x="${CX+lgGap}" y="${legY}" width="${lgW}" height="${s(32)}" rx="${s(4)}" fill="${skin}"/>`;
+  // ── Legs（四股の構え：外側に張った太もも・すねを強調） ──
   const caW=Math.round(lgW*0.84);
-  v+=`<rect x="${CX-lgGap-caW+s(2)}" y="${legY+s(32)}" width="${caW}" height="${s(22)}" rx="${s(5)}" fill="${skin}"/>`;
-  v+=`<rect x="${CX+lgGap+s(2)}" y="${legY+s(32)}" width="${caW}" height="${s(22)}" rx="${s(5)}" fill="${skin}"/>`;
+  // 左太もも（外へ広がるように）
+  v+=`<polygon points="${CX-lgGap-lgW},${legY} ${CX-lgGap},${legY} ${CX-lgGap-s(2)},${legY+s(34)} ${CX-lgGap-lgW-s(5)},${legY+s(34)}" fill="${skin}"/>`;
+  // 右太もも（外へ広がるように）
+  v+=`<polygon points="${CX+lgGap},${legY} ${CX+lgGap+lgW},${legY} ${CX+lgGap+lgW+s(5)},${legY+s(34)} ${CX+lgGap+s(2)},${legY+s(34)}" fill="${skin}"/>`;
+  // 左すね
+  v+=`<polygon points="${CX-lgGap-lgW-s(5)},${legY+s(34)} ${CX-lgGap-s(2)},${legY+s(34)} ${CX-lgGap-s(4)},${legY+s(56)} ${CX-lgGap-caW-s(6)},${legY+s(56)}" fill="${skin}"/>`;
+  // 右すね
+  v+=`<polygon points="${CX+lgGap+s(2)},${legY+s(34)} ${CX+lgGap+lgW+s(5)},${legY+s(34)} ${CX+lgGap+caW+s(6)},${legY+s(56)} ${CX+lgGap+s(4)},${legY+s(56)}" fill="${skin}"/>`;
 
   v+=`</svg>`;
   return v;
@@ -1142,6 +1192,18 @@ function renderStatBars(d){
     const h=d.nameHistory;
     histEl.textContent=(h&&h.length>1)?'改名歴：'+h.join('→'):'';
   }
+  const extraEl=document.getElementById('tr-extra');
+  if(extraEl){
+    const tw=getTokuiWaza(d);
+    const yr=d.yushoRecord||[];
+    let exHtml=`<span style="font-size:10px;font-weight:bold;background:${tw.col};color:#fff8f0;padding:1px 7px;border-radius:2px;">${tw.icon} ${tw.name}</span>`;
+    if(yr.length>0){
+      const counts={};
+      yr.forEach(y=>{counts[y.divName]=(counts[y.divName]||0)+1;});
+      exHtml+=Object.entries(counts).map(([div,n])=>`<span style="font-size:10px;color:#d4a800;margin-left:3px;">🏆${div}×${n}</span>`).join('');
+    }
+    extraEl.innerHTML=exHtml;
+  }
 }
 
 function renderCmdGrid(){
@@ -1417,6 +1479,7 @@ function renderDisciplesTab(){
         <div class="dc-name">${d.name}${d.injury&&d.injury.remaining>0?'<span class="injury-badge">怪我中</span>':''}</div>
         <div class="dc-rank">${rankDisplay(d)}${d.rank>=4?' 〔関取〕':''} / ${d.age}歳 ${d.weight}kg</div>
         ${d.nameHistory&&d.nameHistory.length>1?`<div class="name-hist">改名歴：${d.nameHistory.join('→')}</div>`:''}
+        <div style="margin:2px 0;">${(()=>{const tw=getTokuiWaza(d);const yr=d.yushoRecord||[];return `<span style="font-size:9px;background:${tw.col};color:#fff8f0;padding:0 5px;border-radius:2px;">${tw.icon}${tw.name}</span>`+(yr.length>0?`<span style="font-size:9px;color:#d4a800;margin-left:3px;">🏆×${yr.length}</span>`:'')+( d.kadoBan?`<span style="font-size:9px;color:#c0392b;margin-left:3px;">⚠️カド番</span>`:'')+''})()}</div>
         <div class="dc-stats">
           筋:${d.str} 体:${d.end} 技:${d.tec} 精:${d.men}<br>
           HP:${d.hp}/${d.maxHp} やる気:${d.mot}<br>
@@ -1693,6 +1756,8 @@ function showResults(){
     // 優勝セレモニー
     if(bashoResult==='yusho'){
       const divName=d.rank>=5?'幕内':d.rank===4?'十両':RANKS[d.rank].name;
+      if(!d.yushoRecord) d.yushoRecord=[];
+      d.yushoRecord.push({basho:GS.basho, divName, wins});
       const em=d.rank>=5?'🏆':d.rank===4?'🎉':'⭐';
       const money=d.rank>=5?300:d.rank===4?150:50;
       moneyGain+=money;
@@ -1725,6 +1790,23 @@ function showResults(){
 
     applyRankChange(d, posDelta, wins, bashoResult);
 
+    // 実戦経験による成長（低確率・勝ち星比例）
+    const _gc7=[0,0.04,0.09,0.16,0.24,0.35,0.48,0.65];
+    const _gc15=[0,0.02,0.04,0.06,0.09,0.12,0.15,0.19,0.23,0.28,0.34,0.40,0.46,0.52,0.58,0.64];
+    const _matches=RANKS[Math.max(0,Math.min(d.rank,9))].matches;
+    const _gc=_matches===7?(_gc7[wins]||0):(_gc15[Math.min(wins,15)]||0);
+    const statGrows={};
+    ['str','end','tec','men'].forEach(k=>{
+      if(Math.random()<_gc){
+        const cap=d[k+'Cap']||999, room=cap-d[k];
+        if(room>10){
+          const g=1+Math.floor(Math.random()*Math.min(3,Math.max(1,Math.ceil(room/80))));
+          d[k]=Math.min(cap,d[k]+g);
+          statGrows[k]=(statGrows[k]||0)+g;
+        }
+      }
+    });
+
     d.hp=clamp(d.hp+50,0,d.maxHp);
     d.mot=cl2(d.mot+(kachi?20:5));
     d.overTrain=Math.max(0,(d.overTrain||0)-2);
@@ -1732,7 +1814,7 @@ function showResults(){
     if(d.injury&&d.injury.remaining<=0) d.injury=null;
     if(GS.basho%6===0) d.age++;
 
-    d.tourResult={wins:t.wins,loss:t.loss,kachi,bashoResult};
+    d.tourResult={wins:t.wins,loss:t.loss,kachi,bashoResult,statGrows};
   });
 
   GS.money=Math.max(0,GS.money+moneyGain);
@@ -1754,25 +1836,30 @@ function showResults(){
 function calcPosChange(rank, pos, wins, losses){
   const maxPos=RANKS[rank].maxPos;
   const posRatio=maxPos>1?(pos-1)/(maxPos-1):0; // 0=top, 1=bottom
-  const diff=wins-losses;
 
-  // 序ノ口: 位置なし管理（4勝以上で昇進）
+  // 序ノ口: 4勝以上で昇進
   if(rank===0) return wins>=4?-999:0;
 
-  // 序二段・三段目・幕下（7番勝負）
-  if(rank<4){
-    if(wins===7) return -999; // 全勝 → 特別昇進確定
-    // ランク・位置による変動幅
-    const maxSwing=rank===1?52:rank===2?48:22; // 序二段/三段目/幕下
-    const depthMod=0.55+posRatio*0.9; // 下位ほど大きく動く
-    return -Math.round(diff*(maxSwing/3.5)*depthMod+rnd(-2,2));
+  // 7番勝負（序二段・三段目・幕下）
+  // 実際の番付移動をベースにした勝ち星テーブル
+  if(rank>=1&&rank<=3){
+    if(wins===7) return -999; // 全勝 → 特別昇進
+    // 幕下基準の移動量（+上=番付上昇、-下=降下）
+    const base7={6:28,5:16,4:7,3:-7,2:-17,1:-30,0:-46}[wins]??0;
+    // 序二段・三段目は母数が大きく動く
+    const rankMod=rank===1?1.95:rank===2?1.55:1.0;
+    // 下位ほど大きく動く（上位は同士討ちが多く変動小）
+    const posMod=0.65+posRatio*0.70;
+    return -Math.round(base7*rankMod*posMod+rnd(-2,3));
   }
 
-  // 十両・前頭（15番勝負）
+  // 15番勝負（十両・前頭）
+  // 8勝を基準に勝ち越し/負け越しの星数で移動
   if(rank>=4&&rank<=5){
-    if(diff===0) return 0; // 8勝7敗 → ほぼ現状維持
-    const mag=diff>0?3.2:4.0; // 負け越しの方が下落幅大
-    return -Math.round(diff*mag*(1+posRatio*0.3)+rnd(-1,1));
+    const base=wins-8; // +7〜-8の範囲
+    const mag=base>=0?2.5:3.3; // 負け越しはより大きく落ちる
+    const posMod=1+posRatio*0.28;
+    return -Math.round(base*mag*posMod+rnd(-1,1));
   }
 
   return 0; // 小結以上は applyRankChange 側で別処理
@@ -1975,13 +2062,18 @@ function buildResultsScreen(moneyGain){
     }).join('');
 
     const yushoBadge=tr.bashoResult==='yusho'?'🏆 優勝！':tr.bashoResult==='jun'?'🥈 準優勝':'';
+    const sg=tr.statGrows||{};
+    const SN2={str:'筋力',end:'体力',tec:'技術',men:'精神'};
+    const growBadge=Object.keys(sg).length>0?
+      `<div style="font-size:10px;color:#d4a800;margin:2px 0;">⬆ 実戦成長 ${Object.entries(sg).map(([k,g])=>SN2[k]+'+'+g).join(' ')}</div>`:'';
     div.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <span style="font-size:13px;color:var(--gold3);">${d.name}</span>
         <span class="${kachi?'wc':'lc'}" style="font-size:18px;font-weight:bold;">${tr.wins}勝${tr.loss}敗</span>
       </div>
       ${yushoBadge?`<div style="font-size:14px;font-weight:bold;color:#d4a800;margin-bottom:4px;">${yushoBadge}</div>`:''}
-      <div style="font-size:11px;margin-bottom:5px;" class="${kachi?'wc':'lc'}">${kachi?'✓ 勝ち越し！':'✗ 負け越し...'}</div>
+      <div style="font-size:11px;margin-bottom:3px;" class="${kachi?'wc':'lc'}">${kachi?'✓ 勝ち越し！':'✗ 負け越し...'}</div>
+      ${growBadge}
       <div style="font-size:11px;color:var(--cream);margin-bottom:5px;">番付：${rankDisplay(d)}</div>
       <div class="sec-title" style="margin-top:6px;">▶ 場所前比較</div>
       ${growthRows}
