@@ -526,6 +526,15 @@ const WAZA=['押し出し','突き出し','寄り切り','上手投げ','下手�
 const OPP_PRE=['山','海','龍','鷹','風','鬼','虎','鉄','雷','翔','武','力','岩','浪','熊','湊','錦','宝','旭','朝','大','若','千','豊','花'];
 const OPP_SUF=['龍','鵬','海','山','嶋','錦','富士','桜','岩','流','丸','国','洋','翔','虎','獅子','岳','丘','波','嵐','光','彦','之進','太郎'];
 
+const BASHO_NAMES=[
+  {month:1,  name:'初場所',    place:'東京・両国国技館'},
+  {month:3,  name:'春場所',    place:'大阪・エディオンアリーナ'},
+  {month:5,  name:'夏場所',    place:'東京・両国国技館'},
+  {month:7,  name:'名古屋場所',place:'名古屋・IGアリーナ'},
+  {month:9,  name:'秋場所',    place:'東京・両国国技館'},
+  {month:11, name:'九州場所',  place:'福岡・福岡国際センター'},
+];
+
 // ================================================================
 //  STATE
 // ================================================================
@@ -558,6 +567,11 @@ function newDisciple(name,skinColor,faceType,bodyType,personality,isGenerated=fa
     ozekiMakekoshi:0,
     ozekiTsunaCount:0,
     yokozunaMakekoshi:0,
+    lastTwoBashoResults:[],  // 'yusho'|'jun'|'other'
+    kadoBan:false,
+    promotedJuryo:false,
+    promotedSanyaku:false,
+    promotedOzeki:false,
     retired:false,
   };
 }
@@ -598,6 +612,11 @@ function loadGame(){
           if(!d.nameHistory) d.nameHistory=[d.name];
           if(d.ozekiTsunaCount==null) d.ozekiTsunaCount=0;
           if(d.yokozunaMakekoshi==null) d.yokozunaMakekoshi=0;
+          if(!d.lastTwoBashoResults) d.lastTwoBashoResults=[];
+          if(d.kadoBan==null) d.kadoBan=false;
+          if(d.promotedJuryo==null) d.promotedJuryo=d.rank>=4;
+          if(d.promotedSanyaku==null) d.promotedSanyaku=d.rank>=6;
+          if(d.promotedOzeki==null) d.promotedOzeki=d.rank>=8;
         });
       }
       return true;
@@ -622,9 +641,25 @@ function rankDisplay(d){
 }
 
 function rankScore(d){
-  // Lower = worse rank. Used to compare rank order
   const r=RANKS[d.rank];
   return d.rank*10000 + (r.maxPos - d.pos);
+}
+
+function optimalWeight(d){
+  // 適正体重: bodyType + 筋力 で計算
+  const bt=d.bodyType;
+  if(bt==='heavy')  return Math.min(220, Math.round(130+d.str*0.30));
+  if(bt==='light')  return Math.min(150, Math.round(80 +d.str*0.20));
+  if(bt==='muscle') return Math.min(200, Math.round(110+d.str*0.40));
+  return Math.min(190, Math.round(100+d.str*0.25)); // normal
+}
+
+function getBashoInfo(bashoNum){
+  // bashoNum は 1-indexed の場所通し番号（現在の場所番号）
+  const idx=(bashoNum-1)%6;
+  const b=BASHO_NAMES[idx];
+  const year=7+Math.floor((bashoNum-1)/6); // 令和7年スタート
+  return {name:b.name, place:b.place, year, label:`令和${year}年 ${b.name}`};
 }
 
 function getP(d){return PERS.find(p=>p.id===d.personality)||PERS[0];}
@@ -632,198 +667,158 @@ function getB(d){return BODIES.find(b=>b.id===d.bodyType)||BODIES[0];}
 function getSkin(d){return SKINS.find(s=>s.id===d.skinColor)||SKINS[0];}
 
 // ================================================================
-//  CHARACTER RENDERER (CSS div pixel art – v3 human-like 200×260)
+//  CHARACTER RENDERER (inline SVG – 200×260 / 100×130)
 // ================================================================
 function renderChar(d, size='lg'){
-  const skinMap={fair:'#F5C5A0',wheat:'#C88540',tan:'#8B5E3C',dark:'#4A2E1A'};
-  const skin=skinMap[d.skinColor]||'#F5C5A0';
-  // Slightly darker skin for shadows/outline
-  const skinD={fair:'#D9A070',wheat:'#A06020',tan:'#6B4020',dark:'#301808'}[d.skinColor]||'#D9A070';
-
   const sm=size==='sm';
-  const sc=sm?0.5:1; // scale factor
-  const s=v=>Math.round(v*sc); // helper
+  const W=sm?100:200, H=sm?130:260;
+  const sc=sm?0.5:1;
+  const s=v=>Math.round(v*sc);
+  const CX=W/2;
 
-  const FW=s(200), FH=s(260);
-  const CX=FW/2;
+  const skinCol={fair:'#F5C5A0',wheat:'#C88540',tan:'#8B5E3C',dark:'#4A2E1A'};
+  const skinShd={fair:'#C8905A',wheat:'#7A4010',tan:'#4A2810',dark:'#200A00'};
+  const skin=skinCol[d.skinColor]||'#F5C5A0';
+  const skd=skinShd[d.skinColor]||'#C8905A';
 
-  const w=d.weight;
-  const str=d.str;
+  const w=d.weight, str=d.str;
+  const isLowHp=d.hp<d.maxHp*0.3;
+  const hasInj=d.injury&&d.injury.remaining>0;
+  const isKanto=d.rank>=4;
+  const isYoko=d.rank>=9;
+  const face=d.faceType||'round';
 
-  // Body width scales with weight
-  const bW=clamp(s(60+(Math.max(0,w-80)*0.42)),s(48),s(110));
-  const bellyEx=w>120?Math.min(s(26),s((w-120)*0.42)):0;
+  // Body width by weight tiers
+  const bW=w<90?s(56):w<130?s(76):w<170?s(96):s(116);
+  const belly=w<90?0:w<130?s(5):w<170?s(15):s(28);
 
-  // Arm width scales with strength
-  const uArmW=clamp(s(str>=600?24:str>=300?19:str>=100?15:12),s(10),s(26));
-  const fArmW=Math.round(uArmW*0.82);
-  const uArmH=s(38), fArmH=s(30);
+  // Shoulder/arm by strength tiers
+  const shW=str<400?s(72):str<700?s(90):s(108);
+  const aW=str<400?s(13):str<700?s(17):s(23);
+  const faW=Math.round(aW*0.82);
 
-  const thW=clamp(s(str>=400?27:22),s(18),s(34));
-  const thH=s(34), caH=s(24);
+  // Leg dimensions
+  const lgW=w<90?s(19):w<130?s(23):s(27);
+  const lgGap=s(7);
 
-  const mawColor=d.rank>=9?'#E8C030':d.rank>=4?'#9B1B30':'#7A5C14';
-  const hasTopknot=d.rank>=4; // 関取以上は大銀杏
-  const hasTsuna=d.rank>=9;
-  const faceType=d.faceType||'round';
-  const isLowHp=d.hp<(d.maxHp*0.3);
+  const mawCol=isYoko?'#D4A800':isKanto?'#9B1B30':'#2A3A5C';
 
-  // Head dimensions
-  const headW=s(faceType==='square'?52:faceType==='long'?44:faceType==='baby'?48:48);
-  const headH=s(faceType==='long'?60:faceType==='baby'?46:52);
-  const headBR=faceType==='round'?'48% 48% 44% 44%':faceType==='square'?`${s(6)}px`:faceType==='baby'?'50% 50% 46% 46%':'36% 36% 40% 40%';
-
-  // Y positions (top-down layout)
-  const hairY=s(12);
-  const hy=hasTopknot?s(30):s(14); // head top
-  const neckY=hy+headH;
-  const shoulderY=neckY+s(10);
-  const bodyY=shoulderY+s(4);
-  const bH=s(60);
-  const mawY=bodyY+bH-s(4);
-  const mawH=s(18);
+  // Y layout
+  const headY=isKanto?s(32):s(18);
+  const hW=face==='square'?s(48):face==='long'?s(40):face==='baby'?s(44):s(44);
+  const hH=face==='long'?s(56):face==='baby'?s(42):s(50);
+  const neckY=headY+hH;
+  const torsoY=neckY+s(10);
+  const torsoH=s(62);
+  const mawY=torsoY+torsoH-s(5);
+  const mawH=s(17);
   const legY=mawY+mawH+s(2);
-  const legGap=s(6);
 
-  const hx=CX-Math.round(headW/2);
+  let v=`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0">`;
 
-  let h=`<div style="position:relative;width:${FW}px;height:${FH}px;flex-shrink:0;">`;
-
-  // ── Topknot / Chonmage ──
-  if(hasTopknot){
-    // 大銀杏: fan-shaped bun
-    const knW=s(28), knH=s(16);
-    const kx=CX-Math.round(knW/2), ky=hy-s(16);
-    h+=`<div style="position:absolute;left:${kx}px;top:${ky}px;width:${knW}px;height:${knH}px;background:#1a1210;border-radius:${s(14)}px ${s(14)}px ${s(4)}px ${s(4)}px;"></div>`;
-    // stem
-    h+=`<div style="position:absolute;left:${CX-s(4)}px;top:${ky+knH}px;width:${s(8)}px;height:${s(8)}px;background:#1a1210;border-radius:${s(2)}px;"></div>`;
-    // hair on head
-    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${s(16)}px;background:#1a1210;border-radius:${s(headW/2)}px ${s(headW/2)}px 0 0;"></div>`;
+  // ── 髷 ──
+  if(isKanto){
+    // 大銀杏（扇形）
+    const fY=headY-s(18);
+    v+=`<ellipse cx="${CX}" cy="${fY+s(9)}" rx="${s(15)}" ry="${s(11)}" fill="#1a1210"/>`;
+    v+=`<ellipse cx="${CX}" cy="${fY+s(2)}" rx="${s(12)}" ry="${s(8)}" fill="#1a1210"/>`;
+    v+=`<rect x="${CX-s(4)}" y="${fY+s(16)}" width="${s(8)}" height="${s(8)}" rx="${s(2)}" fill="#1a1210"/>`;
   } else {
-    // 若い力士: thin chonmage (stalk + small knot)
-    const stalkH=s(14);
-    h+=`<div style="position:absolute;left:${CX-s(3)}px;top:${hairY}px;width:${s(6)}px;height:${stalkH}px;background:#1a1210;border-radius:${s(3)}px;"></div>`;
-    h+=`<div style="position:absolute;left:${CX-s(7)}px;top:${hairY}px;width:${s(14)}px;height:${s(10)}px;background:#1a1210;border-radius:50%;"></div>`;
-    // hair fringe
-    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${s(13)}px;background:#1a1210;border-radius:${s(headW/2)}px ${s(headW/2)}px 0 0;"></div>`;
+    // ちょんまげ
+    v+=`<ellipse cx="${CX}" cy="${s(10)}" rx="${s(7)}" ry="${s(5)}" fill="#1a1210"/>`;
+    v+=`<rect x="${CX-s(3)}" y="${s(14)}" width="${s(6)}" height="${s(10)}" rx="${s(2)}" fill="#1a1210"/>`;
   }
+  // Hair cap on head
+  v+=`<ellipse cx="${CX}" cy="${headY}" rx="${hW/2}" ry="${s(isKanto?11:9)}" fill="#1a1210"/>`;
 
   // ── Head ──
-  h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${headH}px;background:${skin};border-radius:${headBR};"></div>`;
+  v+=`<ellipse cx="${CX}" cy="${headY+hH/2}" rx="${hW/2}" ry="${hH/2}" fill="${skin}"/>`;
+  if(isLowHp) v+=`<ellipse cx="${CX}" cy="${headY+hH/2}" rx="${hW/2}" ry="${hH/2}" fill="rgba(160,190,230,0.35)"/>`;
 
-  // Low HP: bluish/pale face tint
-  if(isLowHp){
-    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${headH}px;background:rgba(100,130,200,.22);border-radius:${headBR};pointer-events:none;"></div>`;
-  }
-
-  // ── Face features ──
-  const faceTop=hy;
-  const eyeY=faceTop+Math.round(headH*0.44);
-  const eyeOff=s(faceType==='baby'?9:10);
-  const eyeW=sm?4:9, eyeH=sm?3:8;
-  const pupW=sm?2:5, pupH=sm?3:6;
-
-  // Eyebrows
+  // ── Face ──
+  const eyeY=headY+hH*0.44;
+  const eOX=s(face==='baby'?8:10);
   if(!sm){
-    const browY=eyeY-s(7);
-    const browW=s(10);
-    h+=`<div style="position:absolute;left:${CX-eyeOff-s(1)}px;top:${browY}px;width:${browW}px;height:${s(3)}px;background:#3a2a18;border-radius:2px;transform:rotate(-5deg);"></div>`;
-    h+=`<div style="position:absolute;left:${CX+eyeOff-s(9)}px;top:${browY}px;width:${browW}px;height:${s(3)}px;background:#3a2a18;border-radius:2px;transform:rotate(5deg);"></div>`;
+    // Eyebrows
+    const bY=eyeY-s(8);
+    v+=`<line x1="${CX-eOX-s(4)}" y1="${bY+s(2)}" x2="${CX-eOX+s(5)}" y2="${bY}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
+    v+=`<line x1="${CX+eOX-s(5)}" y1="${bY}" x2="${CX+eOX+s(4)}" y2="${bY+s(2)}" stroke="#2a1a08" stroke-width="${s(3.5)}" stroke-linecap="round"/>`;
   }
-
-  // Eyes (white oval + dark pupil)
-  h+=`<div style="position:absolute;left:${CX-eyeOff-Math.round(eyeW/2)}px;top:${eyeY}px;width:${eyeW}px;height:${eyeH}px;background:#f8f8f0;border-radius:50%;border:1px solid #5a4030;"></div>`;
-  h+=`<div style="position:absolute;left:${CX-eyeOff-Math.round(pupW/2)}px;top:${eyeY+Math.round((eyeH-pupH)/2)}px;width:${pupW}px;height:${pupH}px;background:#1a1210;border-radius:50%;"></div>`;
-  h+=`<div style="position:absolute;left:${CX+eyeOff-Math.round(eyeW/2)}px;top:${eyeY}px;width:${eyeW}px;height:${eyeH}px;background:#f8f8f0;border-radius:50%;border:1px solid #5a4030;"></div>`;
-  h+=`<div style="position:absolute;left:${CX+eyeOff-Math.round(pupW/2)}px;top:${eyeY+Math.round((eyeH-pupH)/2)}px;width:${pupW}px;height:${pupH}px;background:#1a1210;border-radius:50%;"></div>`;
-
-  // Nose
-  if(!sm){
-    h+=`<div style="position:absolute;left:${CX-s(2)}px;top:${eyeY+s(9)}px;width:${s(4)}px;height:${s(3)}px;background:${skinD};border-radius:50%;"></div>`;
-  }
-
-  // Mouth
-  const mouthY=faceTop+Math.round(headH*0.74);
-  const mouthW=sm?5:s(14);
-  h+=`<div style="position:absolute;left:${CX-Math.round(mouthW/2)}px;top:${mouthY}px;width:${mouthW}px;height:${sm?2:s(3)}px;background:#8b5540;border-radius:${s(2)}px;"></div>`;
-
-  // Cheeks (for baby face or heavy bodies)
-  if(!sm&&(faceType==='baby'||w>=140)){
-    h+=`<div style="position:absolute;left:${CX-eyeOff-s(6)}px;top:${eyeY+s(4)}px;width:${s(10)}px;height:${s(6)}px;background:rgba(220,120,100,.28);border-radius:50%;"></div>`;
-    h+=`<div style="position:absolute;left:${CX+eyeOff-s(4)}px;top:${eyeY+s(4)}px;width:${s(10)}px;height:${s(6)}px;background:rgba(220,120,100,.28);border-radius:50%;"></div>`;
+  // Eyes
+  const eRx=sm?s(4):s(5), eRy=isLowHp?(sm?s(1):s(2)):sm?s(3):s(4);
+  v+=`<ellipse cx="${CX-eOX}" cy="${eyeY}" rx="${eRx}" ry="${eRy}" fill="white" stroke="#5a4030" stroke-width="0.8"/>`;
+  v+=`<ellipse cx="${CX+eOX}" cy="${eyeY}" rx="${eRx}" ry="${eRy}" fill="white" stroke="#5a4030" stroke-width="0.8"/>`;
+  v+=`<circle cx="${CX-eOX}" cy="${eyeY}" r="${sm?s(2):s(3)}" fill="#1a1210"/>`;
+  v+=`<circle cx="${CX+eOX}" cy="${eyeY}" r="${sm?s(2):s(3)}" fill="#1a1210"/>`;
+  if(!sm) v+=`<ellipse cx="${CX}" cy="${eyeY+s(9)}" rx="${s(3)}" ry="${s(2)}" fill="${skd}" opacity="0.6"/>`;
+  // Mouth arc
+  const mY2=headY+hH*0.73, mHW=sm?s(7):s(13);
+  v+=`<path d="M${CX-mHW},${mY2} Q${CX},${mY2+s(sm?2:4)} ${CX+mHW},${mY2}" fill="none" stroke="#7a4030" stroke-width="${sm?1.5:2}" stroke-linecap="round"/>`;
+  // Cheeks
+  if(!sm&&(face==='baby'||w>=140)){
+    v+=`<ellipse cx="${CX-eOX-s(4)}" cy="${eyeY+s(7)}" rx="${s(9)}" ry="${s(5)}" fill="rgba(220,90,80,0.2)"/>`;
+    v+=`<ellipse cx="${CX+eOX+s(4)}" cy="${eyeY+s(7)}" rx="${s(9)}" ry="${s(5)}" fill="rgba(220,90,80,0.2)"/>`;
   }
 
   // ── Neck ──
-  const nkW=s(20);
-  h+=`<div style="position:absolute;left:${CX-Math.round(nkW/2)}px;top:${neckY}px;width:${nkW}px;height:${s(12)}px;background:${skin};"></div>`;
+  v+=`<rect x="${CX-s(9)}" y="${neckY}" width="${s(18)}" height="${s(11)}" rx="${s(3)}" fill="${skin}"/>`;
 
-  // ── Shoulder bar (slightly wider than torso) ──
-  const shW=bW+s(6);
-  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)}px;top:${shoulderY}px;width:${shW}px;height:${s(8)}px;background:${skin};border-radius:${s(4)}px ${s(4)}px 0 0;"></div>`;
+  // ── Shoulders ──
+  v+=`<rect x="${CX-shW/2}" y="${torsoY}" width="${shW}" height="${s(9)}" rx="${s(5)}" fill="${skin}"/>`;
 
-  // ── Arms (upper + forearm, two segments) ──
-  const armStartY=shoulderY+s(4);
-  // Left arm
-  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-uArmW}px;top:${armStartY}px;width:${uArmW}px;height:${uArmH}px;background:${skin};border-radius:${s(4)}px 0 0 ${s(4)}px;"></div>`;
-  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-fArmW}px;top:${armStartY+uArmH}px;width:${fArmW}px;height:${fArmH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
-  // Right arm
-  h+=`<div style="position:absolute;left:${CX+Math.round(shW/2)}px;top:${armStartY}px;width:${uArmW}px;height:${uArmH}px;background:${skin};border-radius:0 ${s(4)}px ${s(4)}px 0;"></div>`;
-  h+=`<div style="position:absolute;left:${CX+Math.round(shW/2)+uArmW-fArmW}px;top:${armStartY+uArmH}px;width:${fArmW}px;height:${fArmH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
-
-  // Injury taping on arm (white strip)
-  if(d.injury&&d.injury.remaining>0&&!sm){
-    const tapY=armStartY+Math.round(uArmH*0.4);
-    h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-uArmW-1}px;top:${tapY}px;width:${uArmW+2}px;height:${s(5)}px;background:rgba(255,255,230,.85);border:1px solid #d0c8a0;"></div>`;
+  // ── Arms (upper + forearm) ──
+  const aY=torsoY+s(4);
+  const aH=s(36), faH=s(26);
+  v+=`<rect x="${CX-shW/2-aW}" y="${aY}" width="${aW}" height="${aH}" rx="${s(4)}" fill="${skin}"/>`;
+  v+=`<rect x="${CX-shW/2-faW+s(2)}" y="${aY+aH}" width="${faW}" height="${faH}" rx="${s(4)}" fill="${skin}"/>`;
+  v+=`<rect x="${CX+shW/2}" y="${aY}" width="${aW}" height="${aH}" rx="${s(4)}" fill="${skin}"/>`;
+  v+=`<rect x="${CX+shW/2-s(2)}" y="${aY+aH}" width="${faW}" height="${faH}" rx="${s(4)}" fill="${skin}"/>`;
+  // Injury taping
+  if(hasInj&&!sm){
+    const tY=aY+Math.round(aH*0.4);
+    v+=`<rect x="${CX-shW/2-aW-1}" y="${tY}" width="${aW+2}" height="${s(6)}" rx="${s(2)}" fill="rgba(255,255,220,0.92)" stroke="#c0b890" stroke-width="0.8"/>`;
   }
 
   // ── Torso ──
-  h+=`<div style="position:absolute;left:${CX-Math.round(bW/2)}px;top:${bodyY}px;width:${bW}px;height:${bH}px;background:${skin};"></div>`;
-
-  // Belly extension (heavy body type)
-  if(bellyEx>0){
-    const bxW=bW+bellyEx*2;
-    h+=`<div style="position:absolute;left:${CX-Math.round(bxW/2)}px;top:${bodyY+Math.round(bH*0.5)}px;width:${bxW}px;height:${bellyEx+s(6)}px;background:${skin};border-radius:0 0 45% 45%;"></div>`;
+  if(belly>0){
+    const tx=CX-bW/2, ty=torsoY+s(8), bott=torsoY+torsoH;
+    v+=`<path d="M${tx},${ty} L${tx},${bott-belly} Q${tx-belly},${bott} ${CX-bW/2+s(12)},${bott} L${CX+bW/2-s(12)},${bott} Q${CX+bW/2+belly},${bott} ${CX+bW/2},${bott-belly} L${CX+bW/2},${ty} Z" fill="${skin}"/>`;
+  } else {
+    v+=`<rect x="${CX-bW/2}" y="${torsoY+s(8)}" width="${bW}" height="${torsoH-s(8)}" rx="${s(4)}" fill="${skin}"/>`;
   }
 
   // ── Mawashi ──
-  const mawW=bW+uArmW*2;
-  const mawX=CX-Math.round(mawW/2);
-  h+=`<div style="position:absolute;left:${mawX}px;top:${mawY}px;width:${mawW}px;height:${mawH}px;background:${mawColor};"></div>`;
-  // Mawashi accent stripe
-  if(!sm){
-    const ac=d.rank>=9?'rgba(255,255,200,.35)':'rgba(255,255,255,.18)';
-    h+=`<div style="position:absolute;left:${mawX+s(4)}px;top:${mawY+s(3)}px;width:${mawW-s(8)}px;height:${s(3)}px;background:${ac};border-radius:2px;"></div>`;
-  }
-
-  // Sagari (decorative strings, 関取+)
-  if(d.rank>=4&&!sm){
-    const sagCount=7;
-    for(let i=0;i<sagCount;i++){
-      const sx=mawX+s(4)+Math.round(i*((mawW-s(8))/(sagCount-1)));
-      h+=`<div style="position:absolute;left:${sx}px;top:${mawY+mawH}px;width:${s(2)}px;height:${s(12)}px;background:${mawColor};opacity:.75;border-radius:0 0 1px 1px;"></div>`;
+  const mawW=bW+aW*1.5;
+  const mawX=CX-mawW/2;
+  v+=`<rect x="${mawX}" y="${mawY}" width="${mawW}" height="${mawH}" rx="${s(4)}" fill="${mawCol}"/>`;
+  const hs=isYoko?'rgba(255,240,160,0.5)':'rgba(255,255,255,0.2)';
+  v+=`<rect x="${mawX+s(4)}" y="${mawY+s(3)}" width="${mawW-s(8)}" height="${s(3)}" rx="${s(1)}" fill="${hs}"/>`;
+  // 化粧まわし垂れ（関取+）
+  if(isKanto&&!sm){
+    for(let i=0;i<7;i++){
+      const sx=mawX+s(5)+i*(mawW-s(10))/6;
+      v+=`<line x1="${sx}" y1="${mawY+mawH}" x2="${sx}" y2="${mawY+mawH+s(13)}" stroke="${mawCol}" stroke-width="${s(2)}" opacity="0.75"/>`;
     }
   }
-
-  // Tsuna (横綱 rope + gohei)
-  if(hasTsuna&&!sm){
-    const tY=mawY-s(7);
-    h+=`<div style="position:absolute;left:${mawX-s(4)}px;top:${tY}px;width:${mawW+s(8)}px;height:${s(6)}px;background:#F0EED0;border-radius:${s(3)}px;box-shadow:0 1px 0 #d0c890;"></div>`;
-    // Gohei (zigzag paper strips)
+  // 横綱の綱 + 五幣
+  if(isYoko&&!sm){
+    const tuY=mawY-s(7);
+    v+=`<rect x="${mawX-s(4)}" y="${tuY}" width="${mawW+s(8)}" height="${s(7)}" rx="${s(3)}" fill="#F0EED0" stroke="#C8C060" stroke-width="0.8"/>`;
     for(let i=0;i<4;i++){
-      const gx=mawX+s(6)+Math.round(i*((mawW-s(12))/3));
-      h+=`<div style="position:absolute;left:${gx}px;top:${mawY+mawH}px;width:${s(5)}px;height:${s(15)}px;background:#F0EED0;opacity:.9;clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%);"></div>`;
+      const gx=mawX+s(7)+i*(mawW-s(14))/3;
+      v+=`<polygon points="${gx},${mawY+mawH} ${gx+s(5)},${mawY+mawH} ${gx+s(5)},${mawY+mawH+s(11)} ${gx+s(2.5)},${mawY+mawH+s(15)} ${gx},${mawY+mawH+s(11)}" fill="#F0EED0" opacity="0.88"/>`;
     }
   }
 
-  // ── Legs (thighs + calves) ──
-  h+=`<div style="position:absolute;left:${CX-thW-legGap}px;top:${legY}px;width:${thW}px;height:${thH}px;background:${skin};border-radius:${s(3)}px 0 0 0;"></div>`;
-  h+=`<div style="position:absolute;left:${CX+legGap}px;top:${legY}px;width:${thW}px;height:${thH}px;background:${skin};border-radius:0 ${s(3)}px 0 0;"></div>`;
-  // Calves (slightly narrower)
-  h+=`<div style="position:absolute;left:${CX-thW-legGap+s(2)}px;top:${legY+thH}px;width:${thW-s(4)}px;height:${caH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
-  h+=`<div style="position:absolute;left:${CX+legGap+s(2)}px;top:${legY+thH}px;width:${thW-s(4)}px;height:${caH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
+  // ── Legs ──
+  v+=`<rect x="${CX-lgGap-lgW}" y="${legY}" width="${lgW}" height="${s(32)}" rx="${s(4)}" fill="${skin}"/>`;
+  v+=`<rect x="${CX+lgGap}" y="${legY}" width="${lgW}" height="${s(32)}" rx="${s(4)}" fill="${skin}"/>`;
+  const caW=Math.round(lgW*0.84);
+  v+=`<rect x="${CX-lgGap-caW+s(2)}" y="${legY+s(32)}" width="${caW}" height="${s(22)}" rx="${s(5)}" fill="${skin}"/>`;
+  v+=`<rect x="${CX+lgGap+s(2)}" y="${legY+s(32)}" width="${caW}" height="${s(22)}" rx="${s(5)}" fill="${skin}"/>`;
 
-  h+='</div>';
-  return h;
+  v+=`</svg>`;
+  return v;
 }
 
 // ================================================================
@@ -972,6 +967,54 @@ function doRename(){
 }
 
 // ================================================================
+//  RENAME AT PROMOTION
+// ================================================================
+function showRenameAtPromotion(d, promoTitle){
+  if(!d) return;
+  const histLine=(d.nameHistory&&d.nameHistory.length>1)
+    ?`<div style="font-size:9px;color:var(--gray);margin-bottom:8px;">改名歴：${d.nameHistory.join('→')}</div>`:'';
+
+  document.getElementById('modal-em').textContent='✎';
+  document.getElementById('modal-title').textContent=`${promoTitle}昇進 ─ しこ名の変更`;
+  document.getElementById('modal-title').style.color='var(--gold3)';
+  document.getElementById('modal-text').innerHTML=
+    `<span style="font-size:11px;">${d.name}が<strong>${promoTitle}</strong>に昇進しました！<br>新しいしこ名をつけますか？</span><br><br>`+
+    histLine+
+    `<input id="rename-input" class="rename-input" type="text" maxlength="10" value="${d.name}">`;
+  const cc=document.getElementById('modal-choices');
+  cc.innerHTML='';
+  const ok=document.createElement('button');
+  ok.className='btn btn-gold btn-sm'; ok.textContent='✎ 改名する';
+  ok.addEventListener('click',()=>{
+    const inp=document.getElementById('rename-input');
+    const newName=(inp?inp.value.trim():'').replace(/\s+/g,'');
+    if(newName&&newName!==d.name){
+      const old=d.name;
+      if(!d.nameHistory) d.nameHistory=[old];
+      d.nameHistory.push(newName);
+      d.name=newName;
+      addMsg(`✎ ${old} → ${newName} に改名しました。`,'mge');
+      saveGame();
+      refreshTrainTab&&refreshTrainTab();
+      renderDiscSel&&renderDiscSel();
+      updateMainHeader&&updateMainHeader();
+      buildDiscTabs&&buildDiscTabs();
+    }
+    document.getElementById('modal').classList.remove('on');
+    processModalQueue();
+  });
+  const skip=document.createElement('button');
+  skip.className='btn btn-sm'; skip.textContent='このままでいい';
+  skip.addEventListener('click',()=>{
+    document.getElementById('modal').classList.remove('on');
+    processModalQueue();
+  });
+  cc.appendChild(ok); cc.appendChild(skip);
+  document.getElementById('modal').classList.add('on');
+  setTimeout(()=>{const inp=document.getElementById('rename-input');if(inp){inp.focus();inp.select();}},120);
+}
+
+// ================================================================
 //  CREATE SCREEN
 // ================================================================
 let selSkin='fair', selFace='round', selBody='normal', selPers='earnest';
@@ -1024,8 +1067,9 @@ function initMainScreen(){
   renderCharArea();
   renderDiscSel();
   renderCmdGrid();
-  addMsg(`【第${GS.basho+1}場所前稽古】`,'mge');
-  addMsg(`稽古メニューから${GS.actLeft}回鍛えよう！`,'mg');
+  const _bi=getBashoInfo(GS.basho+1);
+  addMsg(`【${_bi.label} 前稽古】`,'mge');
+  addMsg(`${_bi.place} ／ 稽古メニューから${GS.actLeft}回鍛えよう！`,'mg');
   showScreen('scr-main');
   switchTab('train');
 
@@ -1037,8 +1081,10 @@ function updateMainHeader(){
   const d=GS.disciples[GS.focusIdx];
   if(!d) return;
   document.getElementById('h-name').textContent=d.name;
-  document.getElementById('h-rank').textContent=rankDisplay(d)+(d.rank>=4?'(関取)':'');
-  document.getElementById('h-basho').textContent=`第${GS.basho+1}場所前`;
+  const rankBadge=rankDisplay(d)+(d.rank>=4?'〔関取〕':'')+(d.kadoBan?'⚠️カド番':'');
+  document.getElementById('h-rank').textContent=rankBadge;
+  const bi=getBashoInfo(GS.basho+1);
+  document.getElementById('h-basho').textContent=`${bi.label}`;
   document.getElementById('h-actions').textContent=`稽古 残${GS.actLeft}回`;
   document.getElementById('h-money').textContent=`${GS.money}両`;
 }
@@ -1177,10 +1223,24 @@ function doTrain(cmdId){
       d[s]=gc(d[s]+g,cap);
     });
 
-    // Weight change for chanko
+    // Weight change for chanko（適正体重チェック）
     if(cmdId==='chanko'){
       const cLv=GS.facilities.chanko||1;
-      d.weight=Math.min(220,d.weight+Math.round(rnd(1,3)*(1+(cLv-1)*0.2)));
+      const opt=optimalWeight(d);
+      const over=d.weight-opt;
+      let gain;
+      if(over>30){
+        gain=0;
+        addMsg(`適正体重(${opt}kg前後)を大幅に超えているため体重が増えない...`,'mgb');
+      } else if(over>10){
+        gain=rnd(0,1);
+        addMsg(`適正体重に近づいています。(適正:${opt}kg前後)`,'mgx');
+      } else if(over>=-5){
+        gain=rnd(1,3); // 適正付近: 最大効果
+      } else {
+        gain=rnd(1,2);
+      }
+      d.weight=Math.min(220,d.weight+Math.round(gain*(1+(cLv-1)*0.2)));
     }
 
     // Degeiko: motivation boost
@@ -1420,7 +1480,8 @@ function showBashoScreen(){
   buildDiscTabs();
   refreshBashoUI();
   showScreen('scr-basho');
-  addMsg(`第${GS.basho+1}場所が始まった！`,'mge');
+  const _sbi=getBashoInfo(GS.basho+1);
+  addMsg(`${_sbi.label}が始まった！（${_sbi.place}）`,'mge');
 }
 
 function buildDiscTabs(){
@@ -1453,7 +1514,8 @@ function refreshBashoUI(){
   document.getElementById('t-name').textContent=d.name;
   document.getElementById('t-rank').textContent=rankDisplay(d);
   document.getElementById('t-rec').textContent=`${t.wins}勝${t.loss}敗`;
-  document.getElementById('t-basho-title').textContent=`第${GS.basho+1}場所`;
+  const _tbi=getBashoInfo(GS.basho+1);
+  document.getElementById('t-basho-title').textContent=`${_tbi.label} (${_tbi.place})`;
 
   const done=t.day>=t.mc;
   document.getElementById('t-day').textContent=done?'終了':`${t.day+1}日目`;
@@ -1512,10 +1574,14 @@ function refreshBashoUI(){
 function winProb(d,opp){
   const myP=d.str*0.3+d.end*0.2+d.tec*0.3+d.men*0.2;
   const opP=opp.str*0.3+opp.end*0.2+opp.tec*0.3+opp.men*0.2;
-  // Weight factor: heavier is slightly better, but not huge
-  const wMod=1+(d.weight-110)*0.001;
   const motF=0.82+(d.mot/100)*0.36;
   const injF=(d.injury&&d.injury.remaining>0)?(d.injury.severity==='heavy'?0.65:0.82):1;
+  // 適正体重による補正
+  const opt=optimalWeight(d);
+  const wOff=d.weight-opt;
+  const wMod=wOff>=-10&&wOff<=10?1.06: // 適正付近ボーナス
+    wOff>30?Math.max(0.80,1-wOff*0.004): // 大幅超過ペナルティ
+    1+(d.weight-110)*0.0005; // 通常重量補正
   let p=(myP*motF*wMod*injF)/((myP*motF*wMod*injF)+opP);
   const pe=getP(d);
   if(pe.special==='mental') p=Math.min(0.95,p*1.07);
@@ -1587,8 +1653,15 @@ function showResults(){
   GS.basho++;
 
   let moneyGain=0;
-  // Sponsor bonus
   GS.sponsors.forEach(s=>moneyGain+=s.amount);
+
+  // 優勝判定（各段で最多勝の弟子がいるか）
+  const activeDiscs=GS.disciples.filter(d=>!d.retired&&GS.tour.discs[d.id]);
+  // 幕内優勝ライン（rank 5-9 の中での最多勝）
+  const makuuchiDiscs=activeDiscs.filter(d=>d.rank>=5);
+  const makuuchiMax=makuuchiDiscs.reduce((m,d)=>Math.max(m,GS.tour.discs[d.id].wins),0);
+  const juryoDiscs=activeDiscs.filter(d=>d.rank===4);
+  const juryoMax=juryoDiscs.reduce((m,d)=>Math.max(m,GS.tour.discs[d.id].wins),0);
 
   // Process each disciple
   GS.disciples.filter(d=>!d.retired).forEach(d=>{
@@ -1597,54 +1670,66 @@ function showResults(){
 
     const r=RANKS[d.rank];
     const kachi=t.wins>t.loss;
-    const isJr=d.rank<4; // 幕下以下
+    const wins=t.wins, losses=t.loss;
+
+    // 優勝・準優勝判定
+    let bashoResult='other';
+    if(d.rank>=5){
+      if(wins===makuuchiMax&&wins>=12) bashoResult='yusho';
+      else if(wins>=makuuchiMax-1&&wins>=11) bashoResult='jun';
+    } else if(d.rank===4){
+      if(wins===juryoMax&&wins>=11) bashoResult='yusho';
+      else if(wins>=juryoMax-1&&wins>=10) bashoResult='jun';
+    } else if(d.rank<4&&wins===7) bashoResult='yusho'; // 各段優勝
+
+    // lastTwoBashoResults 更新
+    if(!d.lastTwoBashoResults) d.lastTwoBashoResults=[];
+    d.lastTwoBashoResults.push(bashoResult);
+    if(d.lastTwoBashoResults.length>2) d.lastTwoBashoResults.shift();
+
+    // 優勝セレモニー
+    if(bashoResult==='yusho'){
+      const divName=d.rank>=5?'幕内':d.rank===4?'十両':RANKS[d.rank].name;
+      const em=d.rank>=5?'🏆':d.rank===4?'🎉':'⭐';
+      const money=d.rank>=5?300:d.rank===4?150:50;
+      moneyGain+=money;
+      d.mot=Math.min(100,d.mot+30);
+      queueModal({em,title:`${divName}最高優勝！`,
+        text:`${d.name}が${divName}で${wins}勝を挙げ\n優勝しました！\n\nおめでとうございます！\n賞金+${money}両`,
+        choices:[{label:'🎊 祝！',cb:()=>{}}]});
+    }
 
     // Money from tournaments
-    if(d.rank>=4) moneyGain+=50+d.rank*30+(kachi?50:0); // 関取以上は給金
+    if(d.rank>=4) moneyGain+=50+d.rank*30+(kachi?50:0);
     else moneyGain+=kachi?20:5;
 
-    // Rank change: calculate delta in position using position-weighted system
-    const wins=t.wins, losses=t.loss;
     const posDelta=calcPosChange(d.rank, d.pos, wins, losses);
 
-    // 大関 連続負け越し
-    if(d.rank===8){
-      if(!kachi) d.ozekiMakekoshi=(d.ozekiMakekoshi||0)+1;
-      else d.ozekiMakekoshi=0;
-    }
-    // 横綱 連続負け越し → 引退勧告
+    // 横綱 連続負け越し → 引退勧告（3場所連続8勝以下）
     if(d.rank===9){
-      if(!kachi) d.yokozunaMakekoshi=(d.yokozunaMakekoshi||0)+1;
+      if(wins<=8) d.yokozunaMakekoshi=(d.yokozunaMakekoshi||0)+1;
       else d.yokozunaMakekoshi=0;
-      if(d.yokozunaMakekoshi>=2){
-        queueModal({
-          em:'🏳️',title:`${d.name} 引退勧告！`,
-          text:`横綱が2場所連続負け越しました。\n引退を勧告されています。\n\n続けますか？`,
+      if(d.yokozunaMakekoshi>=3){
+        queueModal({em:'🏳️',title:`${d.name} 引退勧告！`,
+          text:`横綱が3場所連続8勝以下。\n引退を勧告されています。`,
           choices:[
-            {label:'引退する',cb:()=>{d.retired=true;addMsg(`${d.name}が引退しました。`,`mgb`);}},
+            {label:'引退する',cb:()=>{d.retired=true;addMsg(`${d.name}が引退しました。`,'mgb');}},
             {label:'続行する（横綱の意地）',cb:()=>{}}
-          ]
-        });
+          ]});
         d.yokozunaMakekoshi=0;
       }
     }
 
-    // Apply rank/position change
-    applyRankChange(d, posDelta, wins);
+    applyRankChange(d, posDelta, wins, bashoResult);
 
-    // Recovery
     d.hp=clamp(d.hp+50,0,d.maxHp);
     d.mot=cl2(d.mot+(kachi?20:5));
     d.overTrain=Math.max(0,(d.overTrain||0)-2);
-
-    // Injury recovery
     if(d.injury) d.injury.remaining=Math.max(0,d.injury.remaining-1);
     if(d.injury&&d.injury.remaining<=0) d.injury=null;
-
-    // Age advance (every 6 basho)
     if(GS.basho%6===0) d.age++;
 
-    d.tourResult={wins:t.wins,loss:t.loss,kachi};
+    d.tourResult={wins:t.wins,loss:t.loss,kachi,bashoResult};
   });
 
   GS.money=Math.max(0,GS.money+moneyGain);
@@ -1664,69 +1749,119 @@ function showResults(){
 //  RANK CHANGE ENGINE (position-weighted movement)
 // ================================================================
 function calcPosChange(rank, pos, wins, losses){
-  const isJr=rank<4;
   const maxPos=RANKS[rank].maxPos;
   const posRatio=maxPos>1?(pos-1)/(maxPos-1):0; // 0=top, 1=bottom
+  const diff=wins-losses;
 
-  if(isJr){
-    // 7-match format
-    const diff=wins-losses; // +7 to -7
-    if(diff>=7) return -999; // 全勝 → special promotion
-    return -Math.round(diff*(2.5+posRatio*1.5));
-  } else {
-    // 15-match format: 8-7 is break-even
-    const diff=wins-8; // centered on 8 wins
-    if(diff===0) return 0; // 8勝7敗 → stay
-    return -Math.round(diff*(2.2+posRatio*1.4));
+  // 序ノ口: 位置なし管理（4勝以上で昇進）
+  if(rank===0) return wins>=4?-999:0;
+
+  // 序二段・三段目・幕下（7番勝負）
+  if(rank<4){
+    if(wins===7) return -999; // 全勝 → 特別昇進確定
+    // ランク・位置による変動幅
+    const maxSwing=rank===1?52:rank===2?48:22; // 序二段/三段目/幕下
+    const depthMod=0.55+posRatio*0.9; // 下位ほど大きく動く
+    return -Math.round(diff*(maxSwing/3.5)*depthMod+rnd(-2,2));
   }
+
+  // 十両・前頭（15番勝負）
+  if(rank>=4&&rank<=5){
+    if(diff===0) return 0; // 8勝7敗 → ほぼ現状維持
+    const mag=diff>0?3.2:4.0; // 負け越しの方が下落幅大
+    return -Math.round(diff*mag*(1+posRatio*0.3)+rnd(-1,1));
+  }
+
+  return 0; // 小結以上は applyRankChange 側で別処理
 }
 
-function applyRankChange(d, posDelta, wins){
+function checkYokozunaPromotion(d){
+  if(d.rank!==8) return false;
+  const r=d.lastTwoBashoResults||[];
+  if(r.length<2) return false;
+  const last2=[r[r.length-2],r[r.length-1]];
+  if(last2[0]==='yusho'&&last2[1]==='yusho') return true;
+  if((last2[0]==='yusho'&&last2[1]==='jun')||(last2[0]==='jun'&&last2[1]==='yusho')) return true;
+  return false;
+}
+
+function applyRankChange(d, posDelta, wins, bashoResult){
   const r=RANKS[d.rank];
   const losses=r.matches-wins;
   const kachi=wins>losses;
+  const oldRank=d.rank;
 
   // ── 横綱: 降格なし ──
   if(d.rank===9) return;
 
-  // ── 大関: 特殊ルール ──
+  // ── 大関: 特殊ルール（カド番制度） ──
   if(d.rank===8){
-    if(d.ozekiMakekoshi>=2){
-      // 2場所連続負け越し → 関脇降格
-      d.rank=7; d.pos=1; d.ozekiMakekoshi=0;
-      queueModal({em:'😢',title:`${d.name} 大関陥落`,text:`2場所連続負け越しにより\n大関から関脇に降格しました。`,choices:[{label:'了解',cb:()=>{}}]});
-    } else if(kachi&&wins>=13){
-      // 13勝以上2場所で横綱審議
-      d.ozekiTsunaCount=(d.ozekiTsunaCount||0)+1;
-      if(d.ozekiTsunaCount>=2){
-        // 横綱昇進
-        d.rank=9; d.pos=1; d.ozekiTsunaCount=0;
-        queueModal({em:'🏆',title:`${d.name} 横綱昇進！！`,text:`2場所連続13勝以上！\n横綱に昇進しました！！`,choices:[{label:'祝！',cb:()=>{}}]});
+    if(!kachi){
+      if(d.kadoBan){
+        // カド番で負け越し → 関脇陥落
+        d.rank=7; d.pos=1; d.kadoBan=false; d.ozekiMakekoshi=0;
+        queueModal({em:'😢',title:`${d.name} 大関陥落`,
+          text:`カド番の場所で負け越しました。\n大関から関脇に陥落しました。`,
+          choices:[{label:'了解',cb:()=>{}}]});
       } else {
-        queueModal({em:'⭐',title:'綱取り場所！',text:`${d.name}が横綱昇進に\n王手をかけました！\n次の場所が勝負です！`,choices:[{label:'了解',cb:()=>{}}]});
+        d.kadoBan=true;
+        d.ozekiMakekoshi=(d.ozekiMakekoshi||0)+1;
+        queueModal({em:'⚠️',title:`${d.name} カド番！`,
+          text:`大関が負け越しました。\n次の場所はカド番です。\n勝ち越せなければ陥落となります。`,
+          choices:[{label:'了解',cb:()=>{}}]});
       }
     } else {
-      d.ozekiTsunaCount=0; // リセット
+      d.kadoBan=false; d.ozekiMakekoshi=0;
+      // 横綱昇進審議チェック（優勝実績ベース）
+      if(checkYokozunaPromotion(d)){
+        d.rank=9; d.pos=1;
+        queueModal({em:'🏆',title:`${d.name} 横綱昇進！！`,
+          text:`横綱審議委員会が審議の結果\n横綱昇進を決定しました！\n\n2場所連続優勝相当の成績\nおめでとうございます！！`,
+          choices:[{label:'祝！',cb:()=>showRenameAtPromotion(d,'横綱')}]});
+      } else if(wins>=13){
+        queueModal({em:'⭐',title:'横綱審議へ！',
+          text:`${d.name}が優秀な成績を挙げました！\n横綱昇進への王手がかかっています。\n来場所も活躍を期待！`,
+          choices:[{label:'了解',cb:()=>{}}]});
+      }
     }
     return;
   }
 
-  // ── 小結・関脇: 勝ち越し/負け越し ──
-  if(d.rank>=6){
-    if(kachi){
-      if(wins>=r.upWins&&d.rank<8){
-        d.rank++; d.pos=1;
+  // ── 関脇: 大関昇進チェック ──
+  if(d.rank===7){
+    if(kachi&&wins>=11){
+      d.rank=8; d.pos=1; d.kadoBan=false;
+      if(!d.promotedOzeki){
+        d.promotedOzeki=true;
+        queueModal({em:'👑',title:`${d.name} 大関昇進！`,
+          text:`関脇で${wins}勝の大活躍！\n使者が三役揃い踏みで口上を読み上げます：\n\n「謹んでお受け致します！」\n\n大関に昇進しました！`,
+          choices:[{label:'口上！',cb:()=>showRenameAtPromotion(d,'大関')}]});
+      } else {
+        queueModal({em:'👑',title:`${d.name} 大関復帰！`,
+          text:`大関に復帰しました！`,choices:[{label:'了解',cb:()=>{}}]});
       }
-    } else {
-      if(wins<=(r.matches>>1)-3){
-        // 大きく負け越し → 降格
-        d.rank--; d.pos=RANKS[d.rank].maxPos;
-      }
+      return;
     }
-    // 大関昇進チェック
-    if(d.rank===7&&wins>=11){
-      d.rank=8; d.pos=1;
-      queueModal({em:'🌟',title:`${d.name} 大関昇進！`,text:`関脇で大活躍！\n大関に昇進しました！`,choices:[{label:'祝！',cb:()=>{}}]});
+    if(!kachi&&wins<=(r.matches>>1)-3){
+      d.rank--; d.pos=RANKS[d.rank].maxPos;
+    }
+    return;
+  }
+
+  // ── 小結: 関脇昇進チェック ──
+  if(d.rank===6){
+    if(kachi&&wins>=r.upWins){
+      d.rank=7; d.pos=1;
+      if(!d.promotedSanyaku){
+        d.promotedSanyaku=true;
+        queueModal({em:'🌟',title:`${d.name} 三役昇進！`,
+          text:`関脇に昇進しました！\n三役の地位での活躍を期待！`,
+          choices:[{label:'祝！',cb:()=>showRenameAtPromotion(d,'関脇')}]});
+      }
+      return;
+    }
+    if(!kachi&&wins<=(r.matches>>1)-3){
+      d.rank--; d.pos=RANKS[d.rank].maxPos;
     }
     return;
   }
@@ -1735,22 +1870,25 @@ function applyRankChange(d, posDelta, wins){
   if(d.rank>=4){
     let newPos=d.pos+posDelta;
     let newRank=d.rank;
-    // 前頭最高位から小結へ昇進
     if(newRank===5&&newPos<1){
+      // 前頭筆頭→小結昇進
       newRank=6; newPos=1;
+      if(!d.promotedSanyaku){
+        d.promotedSanyaku=true;
+        queueModal({em:'🌟',title:`${d.name} 小結昇進！`,
+          text:`小結に昇進しました！三役の仲間入りです！`,
+          choices:[{label:'祝！',cb:()=>showRenameAtPromotion(d,'小結')}]});
+      }
     } else if(newRank===4&&newPos<1){
-      newRank=5; newPos=RANKS[5].maxPos+newPos;
-      if(newPos<1) newPos=1;
+      newRank=5; newPos=Math.max(1,RANKS[5].maxPos+newPos);
     }
-    // 十両から前頭降格
     if(newPos>RANKS[newRank].maxPos&&newRank===5){
-      const excess=newPos-RANKS[5].maxPos;
-      newRank=4; newPos=excess;
+      const ex=newPos-RANKS[5].maxPos; newRank=4; newPos=clamp(ex,1,RANKS[4].maxPos);
     }
-    // 十両から幕下降格
     if(newPos>RANKS[newRank].maxPos&&newRank===4){
-      const excess=newPos-RANKS[4].maxPos;
-      newRank=3; newPos=excess;
+      const ex=newPos-RANKS[4].maxPos; newRank=3; newPos=clamp(ex,1,RANKS[3].maxPos);
+      queueModal({em:'😰',title:'十両陥落...',
+        text:`${d.name}が十両から幕下に陥落しました。`,choices:[{label:'了解',cb:()=>{}}]});
     }
     newRank=clamp(newRank,0,9);
     newPos=clamp(newPos,1,RANKS[newRank].maxPos);
@@ -1762,33 +1900,54 @@ function applyRankChange(d, posDelta, wins){
   let newPos=d.pos+posDelta;
   let newRank=d.rank;
 
-  // 幕下全勝 → 十両昇進
-  if(d.rank===3&&wins===7){
+  // 幕下15枚目以内全勝 or 1枚目勝ち越し → 十両昇進
+  if(d.rank===3&&wins===7&&d.pos<=15){
     newRank=4; newPos=RANKS[4].maxPos;
     d.rank=newRank; d.pos=newPos;
-    queueModal({em:'🎉',title:'十両昇進！',text:`${d.name}が幕下で全勝！\n十両に昇進しました！`,choices:[{label:'祝！',cb:()=>{}}]});
+    if(!d.promotedJuryo){
+      d.promotedJuryo=true;
+      queueModal({em:'🎊',title:`${d.name} 十両昇進！`,
+        text:`幕下で全勝！関取の仲間入りです！\n大銀杏が結えるようになりました。\n化粧まわしをつけて土俵入りができます！`,
+        choices:[{label:'🎉 祝！',cb:()=>showRenameAtPromotion(d,'十両')}]});
+    } else {
+      queueModal({em:'🎉',title:'十両復帰！',
+        text:`${d.name}が十両に復帰しました！`,choices:[{label:'了解',cb:()=>{}}]});
+    }
+    return;
+  }
+  if(d.rank===3&&d.pos===1&&kachi){
+    newRank=4; newPos=RANKS[4].maxPos;
+    d.rank=newRank; d.pos=newPos;
+    if(!d.promotedJuryo){
+      d.promotedJuryo=true;
+      queueModal({em:'🎊',title:`${d.name} 十両昇進！`,
+        text:`幕下筆頭で勝ち越し！十両昇進です！\n大銀杏が結えるようになりました！`,
+        choices:[{label:'🎉 祝！',cb:()=>showRenameAtPromotion(d,'十両')}]});
+    }
     return;
   }
 
-  // 上のランクへ移動
-  while(newPos<1&&newRank<RANKS.length-1){
+  // 序ノ口: 4勝以上で序二段へ
+  if(d.rank===0){
+    if(wins>=4){ newRank=1; newPos=RANKS[1].maxPos; }
+    else newPos=d.pos; // 序ノ口は落ちない
+    d.rank=newRank; d.pos=newPos;
+    return;
+  }
+
+  // 通常の上下移動
+  while(newPos<1&&newRank<4){
     newRank++;
     if(newRank>=4){newPos=RANKS[newRank].maxPos;break;}
     newPos=RANKS[newRank].maxPos+newPos;
     if(newPos<1) newPos=1;
   }
-
-  // 下のランクへ移動（序ノ口は落ちない）
   while(newPos>RANKS[newRank].maxPos&&newRank>0){
     const excess=newPos-RANKS[newRank].maxPos;
     newRank--;
-    newPos=excess;
-    if(newPos<1) newPos=1;
+    newPos=clamp(excess,1,RANKS[newRank].maxPos);
   }
-
-  // 序ノ口のフロア
   if(newRank===0) newPos=clamp(newPos,1,RANKS[0].maxPos);
-
   newRank=clamp(newRank,0,RANKS.length-1);
   newPos=clamp(newPos,1,RANKS[newRank].maxPos||1);
   d.rank=newRank; d.pos=newPos;
@@ -1812,11 +1971,13 @@ function buildResultsScreen(moneyGain){
       return `<div class="grow-row"><span style="color:var(--gold2)">${n}</span><span>${snap[k]||d[k]} → ${d[k]}</span><span class="${diff>=0?'wc':'lc'}">(${diff>=0?'+':''}${diff})</span></div>`;
     }).join('');
 
+    const yushoBadge=tr.bashoResult==='yusho'?'🏆 優勝！':tr.bashoResult==='jun'?'🥈 準優勝':'';
     div.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <span style="font-size:13px;color:var(--gold3);">${d.name}</span>
         <span class="${kachi?'wc':'lc'}" style="font-size:18px;font-weight:bold;">${tr.wins}勝${tr.loss}敗</span>
       </div>
+      ${yushoBadge?`<div style="font-size:14px;font-weight:bold;color:#d4a800;margin-bottom:4px;">${yushoBadge}</div>`:''}
       <div style="font-size:11px;margin-bottom:5px;" class="${kachi?'wc':'lc'}">${kachi?'✓ 勝ち越し！':'✗ 負け越し...'}</div>
       <div style="font-size:11px;color:var(--cream);margin-bottom:5px;">番付：${rankDisplay(d)}</div>
       <div class="sec-title" style="margin-top:6px;">▶ 場所前比較</div>
