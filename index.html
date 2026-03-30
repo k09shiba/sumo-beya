@@ -6,585 +6,377 @@
 <title>横綱への道 - 相撲部屋育成</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:    #0d0d1f;
-  --bg2:   #141428;
-  --bg3:   #1e1e40;
-  --bg4:   #28284e;
-  --red:   #8b1a1a;
-  --red2:  #c0392b;
-  --red3:  #e74c3c;
-  --gold:  #b8860b;
-  --gold2: #d4a843;
-  --gold3: #f0c060;
-  --cream: #f0ead8;
-  --gray:  #7788aa;
-  --green: #1a7a3a;
-  --green2:#27ae60;
-  --blue:  #1a4a8a;
-  --purple:#6a2a8a;
-  --white: #ffffff;
+:root{
+  --bg:#2a1a0a;--bg2:#f5e6c8;--bg3:#ede0bc;--bg4:#e0cfa0;
+  --red:#8b1a1a;--red2:#c0392b;--red3:#e74c3c;
+  --gold:#8b6914;--gold2:#b8860b;--gold3:#8b4513;
+  --cream:#2a1a0a;--gray:#6b5a3a;
+  --green:#1a5a2a;--green2:#2e8b57;
+  --blue:#1a4a8a;--blue2:#2980b9;
+  --purple:#6a2a8a;--purple2:#9b59b6;
+  --white:#fff8f0;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
-  background:var(--bg);
-  color:var(--cream);
-  font-family:'DotGothic16',monospace;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  overflow-x:hidden;
-}
-#game{
-  width:100%;
-  max-width:460px;
-  min-height:100vh;
-  background:var(--bg2);
-  display:flex;
-  flex-direction:column;
-  position:relative;
-  border-left:1px solid #222;
-  border-right:1px solid #222;
-}
-/* SCREENS */
-.screen{display:none;flex-direction:column;flex:1;padding:10px;}
+body{background:var(--bg);color:var(--cream);font-family:'DotGothic16',monospace;display:flex;justify-content:center;min-height:100vh;}
+#game{width:100%;max-width:460px;min-height:100vh;background:var(--bg2);display:flex;flex-direction:column;border-left:1px solid #a08040;border-right:1px solid #a08040;}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .screen.active{display:flex;}
 
-/* ===== PIXEL BOX ===== */
-.pbox{
-  background:var(--bg3);
-  border:2px solid var(--gold);
-  box-shadow:inset 1px 1px 0 var(--gold3), inset -1px -1px 0 #6b4800, 2px 2px 0 #000;
-  padding:10px;
-  margin-bottom:8px;
-}
-.pbox-red{border-color:var(--red2);box-shadow:inset 1px 1px 0 #e88,inset -1px -1px 0 #600,2px 2px 0 #000;}
-.pbox-green{border-color:var(--green2);box-shadow:inset 1px 1px 0 #8e8,inset -1px -1px 0 #060,2px 2px 0 #000;}
+/* ---- PIXEL BOX ---- */
+.pbox{background:var(--bg3);border:2px solid var(--gold);box-shadow:inset 1px 1px 0 var(--gold3),inset -1px -1px 0 #8b6914,2px 2px 0 rgba(0,0,0,.25);padding:8px;margin-bottom:7px;}
+.pbox-red{border-color:var(--red2);box-shadow:inset 1px 1px 0 #f88,inset -1px -1px 0 #600,2px 2px 0 #000;}
+.pbox-green{border-color:var(--green2);box-shadow:inset 1px 1px 0 #8f8,inset -1px -1px 0 #060,2px 2px 0 #000;}
+.pbox-blue{border-color:var(--blue2);box-shadow:inset 1px 1px 0 #8af,inset -1px -1px 0 #008,2px 2px 0 #000;}
 
-/* ===== BUTTONS ===== */
-.btn{
-  display:block;width:100%;
-  padding:13px 8px;
-  background:var(--bg4);
-  color:var(--cream);
-  border:2px solid var(--gold);
-  font-family:'DotGothic16',monospace;
-  font-size:14px;
-  cursor:pointer;
-  text-align:center;
-  box-shadow:3px 3px 0 #000;
-  margin-bottom:6px;
-  transition:transform .08s,box-shadow .08s;
-  line-height:1.4;
-}
-.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000;}
-.btn:disabled{opacity:.35;cursor:not-allowed;}
-.btn-red{background:var(--red);border-color:var(--red2);}
-.btn-gold{background:#3a2600;border-color:var(--gold2);color:var(--gold3);}
-.btn-green{background:#0a2a12;border-color:var(--green2);color:#7eff9a;}
-.btn-blue{background:#0a1a3a;border-color:#4a8adf;color:#9ac8ff;}
-.btn-sm{padding:8px 6px;font-size:12px;box-shadow:2px 2px 0 #000;}
+/* ---- BUTTONS ---- */
+.btn{display:block;width:100%;padding:12px 8px;background:var(--bg4);color:var(--cream);border:2px solid var(--gold);font-family:'DotGothic16',monospace;font-size:13px;cursor:pointer;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,.3);margin-bottom:5px;transition:transform .07s,box-shadow .07s;line-height:1.4;}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3);}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-red{background:#c0392b;border-color:var(--red2);color:#fff8f0;}
+.btn-gold{background:#f0e8c0;border-color:var(--gold2);color:var(--gold3);}
+.btn-green{background:#d0f0d8;border-color:var(--green2);color:#1a6a2a;}
+.btn-blue{background:#d0e0f8;border-color:var(--blue2);color:#1a4a8a;}
+.btn-sm{padding:7px 5px;font-size:11px;box-shadow:2px 2px 0 rgba(0,0,0,.3);margin-bottom:4px;}
 
-/* ===== STAT BARS ===== */
-.sbar-wrap{display:flex;align-items:center;gap:5px;margin:3px 0;}
-.sbar-lbl{width:52px;font-size:10px;color:var(--gold3);text-align:right;flex-shrink:0;}
-.sbar-bg{flex:1;height:11px;background:#0a0a18;border:1px solid #333;position:relative;overflow:hidden;}
-.sbar-fill{height:100%;transition:width .4s;background:var(--gold2);}
-.sbar-fill-hp{background:var(--green2);}
-.sbar-fill-hp.mid{background:#e67e22;}
-.sbar-fill-hp.low{background:var(--red3);}
-.sbar-fill-mot{background:#9b59b6;}
-.sbar-val{width:28px;font-size:10px;text-align:right;flex-shrink:0;color:var(--cream);}
+/* ---- STAT BARS ---- */
+.sbar{display:flex;align-items:center;gap:4px;margin:2px 0;}
+.sbar-l{width:50px;font-size:10px;color:var(--gold3);text-align:right;flex-shrink:0;}
+.sbar-bg{flex:1;height:10px;background:#d8cfa8;border:1px solid #b8a878;overflow:hidden;}
+.sbar-f{height:100%;transition:width .35s;}
+.fc-str{background:var(--red2);}
+.fc-end{background:var(--green2);}
+.fc-tec{background:var(--blue2);}
+.fc-men{background:var(--purple2);}
+.fc-hp{background:var(--green2);}
+.fc-hp.mid{background:#e67e22;}
+.fc-hp.low{background:var(--red3);}
+.fc-mot{background:var(--purple2);}
+.sbar-v{width:32px;font-size:10px;text-align:right;color:var(--cream);flex-shrink:0;}
 
-/* ===== HEADER ===== */
-.g-header{
-  background:var(--bg);
-  border-bottom:2px solid var(--gold);
-  padding:7px 10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-shrink:0;
-}
-.g-header-name{font-size:15px;color:var(--gold3);letter-spacing:1px;}
-.g-header-rank{font-size:11px;color:var(--cream);margin-top:2px;}
-.g-header-center{text-align:center;}
-.g-header-turn{font-size:11px;color:var(--gray);}
-.rank-badge{
-  display:inline-block;
-  background:var(--red);
-  border:1px solid var(--red2);
-  color:var(--gold3);
-  padding:2px 8px;
-  font-size:11px;
-}
+/* ---- HEADER ---- */
+.ghdr{background:var(--bg4);border-bottom:2px solid var(--gold);padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.ghdr-name{font-size:14px;color:var(--gold3);}
+.ghdr-rank{font-size:10px;margin-top:2px;}
+.rank-badge{display:inline-block;background:var(--red);border:1px solid var(--red2);color:var(--gold3);padding:2px 6px;font-size:10px;}
 
-/* ===== MESSAGE BOX ===== */
-.msgbox{
-  min-height:58px;max-height:100px;
-  background:#080812;
-  border:1px solid #2a2a4a;
-  padding:6px 8px;
-  font-size:11px;
-  line-height:1.9;
-  overflow-y:auto;
-  flex-shrink:0;
-}
-.msg-good{color:#6dff8d;}
-.msg-bad{color:#ff7070;}
-.msg-event{color:var(--gold3);}
-.msg-normal{color:var(--cream);}
-.msg-gray{color:var(--gray);}
+/* ---- MSG BOX ---- */
+.msgbox{min-height:52px;max-height:90px;background:#f8f0d8;border:1px solid #d4c090;padding:5px 7px;font-size:11px;line-height:1.9;overflow-y:auto;flex-shrink:0;}
+.msgbox::-webkit-scrollbar{width:3px;}
+.msgbox::-webkit-scrollbar-thumb{background:var(--gold);}
+.mg{color:var(--cream);}.mgg{color:#1a6a2a;}.mgb{color:#8b1a1a;}.mge{color:var(--gold3);}.mgx{color:var(--gray);}
 
-/* ===== TITLE SCREEN ===== */
+/* ---- TITLE ---- */
 #title-screen{justify-content:center;align-items:center;text-align:center;padding:20px;}
-.title-logo{margin-bottom:16px;}
-.title-main{
-  font-size:26px;
-  color:var(--gold3);
-  text-shadow:3px 3px 0 #000, -1px 0 0 var(--red2), 0 -1px 0 var(--red2);
-  line-height:1.5;
-  letter-spacing:2px;
-}
-.title-sub{font-size:12px;color:var(--gray);margin-top:6px;letter-spacing:1px;}
-.title-dohyo{
-  font-size:64px;
-  margin:20px 0;
-  animation:pulse 2s ease-in-out infinite;
-  display:block;
-}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-.title-btn-area{width:100%;max-width:300px;}
+.title-main{font-size:24px;color:var(--gold3);text-shadow:3px 3px 0 #000,-1px 0 0 var(--red2),0 -1px 0 var(--red2);line-height:1.5;letter-spacing:2px;}
+.title-sub{font-size:11px;color:var(--gray);margin-top:5px;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.title-icon{font-size:60px;margin:16px 0;display:block;animation:pulse 2.5s ease-in-out infinite;}
 
-/* ===== CREATE SCREEN ===== */
-.create-label{font-size:11px;color:var(--gold2);margin-bottom:4px;display:block;}
-.game-input{
-  width:100%;padding:10px;
-  background:var(--bg);
-  border:2px solid var(--gold);
-  color:var(--cream);
-  font-family:'DotGothic16',monospace;
-  font-size:18px;
-  text-align:center;
-  margin-bottom:12px;
-  outline:none;
-}
-.game-input:focus{border-color:var(--gold3);}
-.select-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
-.sel-btn{
-  padding:10px 6px;
-  background:var(--bg3);
-  border:2px solid var(--gold);
-  color:var(--cream);
-  font-family:'DotGothic16',monospace;
-  font-size:11px;
-  cursor:pointer;
-  text-align:center;
-  box-shadow:2px 2px 0 #000;
-  transition:transform .08s;
-}
-.sel-btn:active{transform:translate(1px,1px);}
-.sel-btn.selected{background:#3a2600;border-color:var(--gold3);color:var(--gold3);}
-.sel-btn .sel-emoji{font-size:20px;display:block;margin-bottom:4px;}
-.sel-btn .sel-name{font-size:12px;color:var(--gold3);display:block;}
-.sel-btn .sel-desc{font-size:9px;color:var(--gray);display:block;margin-top:3px;line-height:1.4;}
+/* ---- CREATE ---- */
+.create-scroll{overflow-y:auto;flex:1;padding:10px;}
+.clabel{font-size:10px;color:var(--gold2);margin-bottom:3px;display:block;}
+.ginput{width:100%;padding:9px;background:var(--bg);border:2px solid var(--gold);color:var(--cream);font-family:'DotGothic16',monospace;font-size:16px;text-align:center;margin-bottom:10px;}
+.ginput:focus{border-color:var(--gold3);outline:none;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;}
+.sbtn{padding:9px 5px;background:var(--bg3);border:2px solid var(--gold);color:var(--cream);font-family:'DotGothic16',monospace;cursor:pointer;text-align:center;box-shadow:2px 2px 0 rgba(0,0,0,.25);transition:transform .07s;}
+.sbtn:active{transform:translate(1px,1px);}
+.sbtn.on{background:#f0e8c0;border-color:var(--gold3);color:var(--gold3);}
+.sbtn .se{font-size:18px;display:block;margin-bottom:3px;}
+.sbtn .sn{font-size:11px;color:var(--gold3);display:block;}
+.sbtn .sd{font-size:9px;color:var(--gray);display:block;margin-top:2px;line-height:1.3;}
+.sec-title{font-size:10px;color:var(--gold2);border-bottom:1px solid var(--gold);padding-bottom:3px;margin-bottom:6px;letter-spacing:1px;}
 
-/* ===== TRAINING SCREEN ===== */
-.profile-card{
-  display:flex;gap:10px;align-items:flex-start;
-  padding:8px 10px;
-  background:var(--bg3);
-  border:2px solid var(--gold);
-  box-shadow:2px 2px 0 #000;
-  margin-bottom:8px;
-  flex-shrink:0;
-}
-.profile-sprite{font-size:44px;flex-shrink:0;line-height:1;}
-.profile-info{flex:1;min-width:0;}
-.profile-name{font-size:16px;color:var(--gold3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.profile-detail{font-size:10px;color:var(--gray);margin-top:2px;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+/* ---- TABS ---- */
+.tabs{display:flex;border-bottom:2px solid var(--gold);flex-shrink:0;background:var(--bg4);}
+.tab{flex:1;padding:9px 4px;text-align:center;font-size:11px;cursor:pointer;color:var(--gray);border-right:1px solid #c0a870;background:var(--bg4);}
+.tab:last-child{border-right:none;}
+.tab.active{background:var(--bg3);color:var(--gold3);border-bottom:2px solid var(--gold3);}
+.tab-pane{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.tab-pane.active{display:flex;}
 
-.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;}
-.cmd-btn{
-  padding:11px 7px;
-  background:var(--bg3);
-  border:2px solid var(--gold);
-  color:var(--cream);
-  font-family:'DotGothic16',monospace;
-  cursor:pointer;
-  text-align:center;
-  box-shadow:2px 2px 0 #000;
-  transition:transform .08s,box-shadow .08s;
-}
-.cmd-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000;}
-.cmd-btn:disabled{opacity:.3;cursor:not-allowed;}
-.cmd-btn .cn{font-size:12px;color:var(--gold3);display:block;}
-.cmd-btn .ce{font-size:9px;color:var(--gray);display:block;margin-top:2px;line-height:1.3;}
-.cmd-btn .cc{font-size:9px;color:#ff9a9a;display:block;}
-.cmd-special{border-color:var(--red2);background:#1e0a0a;}
-.cmd-rest{border-color:var(--green2);background:#0a1e0a;grid-column:1/-1;}
+/* ---- CHARACTER DISPLAY ---- */
+.char-area{display:flex;justify-content:center;align-items:center;padding:10px 0;background:#e8d5a0;border-bottom:2px solid var(--gold);flex-shrink:0;min-height:280px;}
 
-/* ===== TOURNAMENT SCREEN ===== */
-.t-status{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:5px 10px;
-  background:var(--bg);
-  border:1px solid var(--gold);
-  margin-bottom:6px;
-  font-size:11px;
-  flex-shrink:0;
-}
-.record-grid{
-  display:grid;gap:3px;
-  margin-bottom:8px;
-  flex-shrink:0;
-}
-.record-grid-15{grid-template-columns:repeat(5,1fr);}
-.record-grid-7{grid-template-columns:repeat(7,1fr);}
-.rc{
-  height:28px;border:1px solid #333;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;
-}
-.rc-win{background:#0a2a0a;color:#6dff8d;}
-.rc-lose{background:#2a0a0a;color:#ff7070;}
-.rc-empty{background:#0a0a18;color:#333;}
+/* ---- DISCIPLE SELECTOR ---- */
+.disc-sel{display:flex;gap:4px;padding:5px 8px;background:var(--bg4);border-bottom:1px solid #c0a870;flex-shrink:0;overflow-x:auto;}
+.disc-chip{padding:5px 10px;background:var(--bg3);border:1px solid var(--gold);font-size:10px;cursor:pointer;white-space:nowrap;color:var(--gray);}
+.disc-chip.active{background:#f0e8c0;border-color:var(--gold3);color:var(--gold3);}
 
-.match-box{
-  padding:12px 10px;
-  background:var(--bg3);
-  border:2px solid var(--gold);
-  text-align:center;
-  margin-bottom:8px;
-  flex-shrink:0;
-}
-.vs-row{
-  display:flex;justify-content:center;align-items:center;
-  gap:16px;margin:8px 0;
-}
-.vs-name{font-size:15px;color:var(--cream);}
-.vs-rank{font-size:10px;color:var(--gray);margin-top:2px;}
-.vs-text{font-size:22px;color:var(--red3);font-weight:bold;}
-.win-prob{font-size:10px;color:var(--gray);margin-top:6px;}
-.match-result-big{font-size:22px;font-weight:bold;margin:8px 0;}
-.match-tech{font-size:12px;color:var(--gray);}
-.win-color{color:#6dff8d;}
-.lose-color{color:#ff7070;}
+/* ---- TRAINING COMMANDS ---- */
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px;}
+.cbtn{padding:10px 6px;background:var(--bg3);border:2px solid var(--gold);color:var(--cream);font-family:'DotGothic16',monospace;cursor:pointer;text-align:center;box-shadow:2px 2px 0 rgba(0,0,0,.25);transition:transform .07s;}
+.cbtn:active{transform:translate(1px,1px);}
+.cbtn:disabled{opacity:.3;cursor:not-allowed;}
+.cn{font-size:11px;color:var(--gold3);display:block;}
+.ce{font-size:9px;color:var(--gray);display:block;margin-top:2px;line-height:1.3;}
+.cc{font-size:9px;color:#c0392b;display:block;}
+.csp{border-color:var(--red2);background:#f0d8d0;}
+.crs{border-color:var(--green2);background:#d8f0d8;grid-column:1/-1;}
 
-/* ===== RESULTS SCREEN ===== */
-.res-center{text-align:center;padding:16px 10px 10px;}
-.res-big{font-size:50px;margin-bottom:8px;display:block;}
-.res-record{font-size:26px;font-weight:bold;margin:6px 0;}
-.res-comment{font-size:14px;margin:4px 0;}
-.res-rank-change{font-size:15px;text-align:center;padding:8px;}
-.growth-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;border-bottom:1px solid #222;}
-.growth-name{color:var(--gold2);}
-.growth-num{color:var(--cream);}
-.growth-diff{font-size:11px;}
+/* ---- FACILITY ---- */
+.fac-item{display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg3);border:1px solid var(--gold);margin-bottom:5px;}
+.fac-info{flex:1;}
+.fac-name{font-size:12px;color:var(--gold3);}
+.fac-desc{font-size:9px;color:var(--gray);margin-top:2px;}
+.fac-lv{display:flex;gap:3px;margin-top:4px;}
+.fac-star{width:12px;height:12px;background:#d0c8a0;border:1px solid #b0a878;}
+.fac-star.on{background:var(--gold2);border-color:var(--gold3);}
+.fac-btn{padding:6px 10px;background:var(--red);border:1px solid var(--red2);color:var(--cream);font-family:'DotGothic16',monospace;font-size:10px;cursor:pointer;flex-shrink:0;box-shadow:2px 2px 0 #000;}
+.fac-btn:disabled{opacity:.3;cursor:not-allowed;}
+.money-disp{text-align:center;padding:6px;font-size:13px;color:var(--gold3);background:var(--bg4);border-bottom:1px solid #c0a870;flex-shrink:0;}
 
-/* ===== CLEAR / GAMEOVER ===== */
-.end-screen{
-  flex:1;
-  display:flex;flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:20px;
-}
-.end-big{font-size:64px;margin-bottom:12px;}
-.end-title{font-size:22px;margin-bottom:12px;}
-.end-msg{font-size:12px;line-height:2.2;margin-bottom:16px;color:var(--cream);}
+/* ---- DISCIPLE CARDS ---- */
+.disc-card{display:flex;gap:8px;padding:8px;background:var(--bg3);border:1px solid var(--gold);margin-bottom:5px;align-items:flex-start;}
+.dc-char{flex-shrink:0;}
+.dc-info{flex:1;min-width:0;}
+.dc-name{font-size:13px;color:var(--gold3);}
+.dc-rank{font-size:10px;color:var(--cream);margin-top:2px;}
+.dc-stats{font-size:9px;color:var(--gray);margin-top:3px;line-height:1.6;}
 
-/* ===== SECTION TITLE ===== */
-.sec-title{
-  font-size:11px;color:var(--gold2);
-  border-bottom:1px solid var(--gold);
-  padding-bottom:3px;
-  margin-bottom:6px;
-  letter-spacing:1px;
-}
+/* ---- TOURNAMENT ---- */
+.t-status{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(--bg4);border:1px solid var(--gold);margin-bottom:5px;font-size:11px;flex-shrink:0;}
+.rgrid{display:grid;gap:3px;margin-bottom:6px;flex-shrink:0;}
+.rg15{grid-template-columns:repeat(5,1fr);}
+.rg7{grid-template-columns:repeat(7,1fr);}
+.rc{height:26px;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.rcw{background:#c8ead0;color:#1a6a2a;}
+.rcl{background:#ead0d0;color:#8b1a1a;}
+.rce{background:#e8e0c0;color:#888;}
+.match-box{padding:10px 8px;background:var(--bg3);border:2px solid var(--gold);text-align:center;margin-bottom:6px;flex-shrink:0;box-shadow:2px 2px 0 rgba(0,0,0,.2);}
+.vsrow{display:flex;justify-content:center;align-items:center;gap:14px;margin:7px 0;}
+.vsname{font-size:14px;}
+.vsrank{font-size:9px;color:var(--gray);margin-top:2px;}
+.vstxt{font-size:20px;color:var(--red3);}
+.result-big{font-size:20px;font-weight:bold;margin:7px 0;}
+.wc{color:#1a6a2a;}.lc{color:#8b1a1a;}
+.disc-tab-btns{display:flex;gap:4px;padding:4px 6px;background:var(--bg4);flex-shrink:0;}
+.dt-btn{flex:1;padding:5px 3px;background:var(--bg3);border:1px solid var(--gold);font-family:'DotGothic16',monospace;font-size:10px;cursor:pointer;color:var(--gray);}
+.dt-btn.on{background:#f0e8c0;border-color:var(--gold3);color:var(--gold3);}
 
-/* ===== MODAL ===== */
-.modal-overlay{
-  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,.85);z-index:200;
-  justify-content:center;align-items:center;
-}
-.modal-overlay.active{display:flex;}
-.modal-box{
-  width:88%;max-width:380px;
-  background:var(--bg2);
-  border:3px solid var(--gold);
-  box-shadow:0 0 30px rgba(180,120,0,.3),4px 4px 0 #000;
-  padding:20px;
-  text-align:center;
-  animation:modalIn .2s ease-out;
-}
-@keyframes modalIn{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
-.modal-emoji{font-size:40px;margin-bottom:10px;display:block;}
-.modal-title{font-size:16px;color:var(--gold3);margin-bottom:10px;}
-.modal-text{font-size:12px;line-height:2;margin-bottom:14px;white-space:pre-line;}
+/* ---- RESULTS ---- */
+.res-center{text-align:center;padding:12px 8px 8px;}
+.res-record{font-size:22px;font-weight:bold;margin:5px 0;}
+.res-comment{font-size:13px;margin:3px 0;}
+.grow-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid #d4c090;}
 
-/* ===== SCROLLABLE ===== */
+/* ---- END SCREENS ---- */
+.end-sc{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}
+.end-big{font-size:56px;margin-bottom:10px;}
+.end-title{font-size:20px;margin-bottom:10px;}
+.end-msg{font-size:11px;line-height:2.2;margin-bottom:14px;}
+
+/* ---- MODAL ---- */
+.modal-ov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:300;justify-content:center;align-items:center;}
+.modal-ov.on{display:flex;}
+.modal-bx{width:88%;max-width:380px;background:var(--bg2);border:3px solid var(--gold);box-shadow:0 0 24px rgba(139,105,20,.35),4px 4px 0 rgba(0,0,0,.35);padding:18px;text-align:center;}
+@keyframes mIn{from{transform:scale(.82);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-bx{animation:mIn .18s ease-out;}
+.modal-em{font-size:36px;margin-bottom:8px;display:block;}
+.rename-btn{font-size:9px;padding:2px 6px;background:var(--bg4);border:1px solid var(--gold);color:var(--gold2);cursor:pointer;font-family:'DotGothic16',monospace;border-radius:2px;margin-left:5px;vertical-align:middle;}
+.rename-input{width:90%;padding:8px;font-family:'DotGothic16',monospace;font-size:13px;background:var(--bg2);border:2px solid var(--gold);color:var(--cream);text-align:center;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;}
+.name-hist{font-size:9px;color:var(--gray);padding:2px 0 4px;}
+.modal-title{font-size:14px;color:var(--gold3);margin-bottom:8px;}
+.modal-text{font-size:11px;line-height:1.9;margin-bottom:12px;white-space:pre-line;text-align:left;}
+.modal-choices{display:flex;flex-direction:column;gap:5px;}
+
+/* ---- MISC ---- */
 .scroll{overflow-y:auto;flex:1;}
-
-/* ===== BANZUKE INFO ===== */
-.banzuke-info{
-  padding:5px 8px;
-  background:#0a0a18;
-  border:1px solid #2a2a4a;
-  font-size:10px;
-  color:var(--gray);
-  margin-bottom:6px;
-}
-
-/* ===== PROGRESS BAR FOR BASHO ===== */
-.basho-progress{
-  display:flex;align-items:center;gap:6px;
-  font-size:10px;color:var(--gray);
-  margin-bottom:4px;
-}
-.basho-dots{display:flex;gap:2px;}
-.basho-dot{width:8px;height:8px;border:1px solid #444;background:#0a0a18;}
-.basho-dot.done{background:var(--gold2);}
-.basho-dot.current{background:var(--red2);}
-
-/* ===== SHIMMER ANIMATION ===== */
-@keyframes shimmer{
-  0%{opacity:.7;}
-  50%{opacity:1;}
-  100%{opacity:.7;}
-}
-.shimmer{animation:shimmer 1.5s ease-in-out infinite;}
-
-/* ===== YOKOZUNA FLASH ===== */
-@keyframes yokozuna-flash{
-  0%,100%{background:var(--bg2);}
-  50%{background:#2a1a00;}
-}
-.yokozuna-screen{animation:yokozuna-flash 1s ease-in-out infinite;}
-
-/* hide scrollbars but keep scroll */
-.msgbox::-webkit-scrollbar,.scroll::-webkit-scrollbar{width:3px;}
-.msgbox::-webkit-scrollbar-track,.scroll::-webkit-scrollbar-track{background:#0a0a18;}
-.msgbox::-webkit-scrollbar-thumb,.scroll::-webkit-scrollbar-thumb{background:var(--gold);}
+.scroll::-webkit-scrollbar{width:3px;}
+.scroll::-webkit-scrollbar-thumb{background:var(--gold);}
+.pad{padding:8px;}
+@keyframes shimmer{0%,100%{opacity:.7;}50%{opacity:1;}}
+.shimmer{animation:shimmer 1.6s ease-in-out infinite;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.slide-up{animation:slideUp .25s ease-out;}
+.injury-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;margin-left:4px;}
 </style>
 </head>
 <body>
 <div id="game">
 
-<!-- ========== TITLE ========== -->
-<div class="screen active" id="title-screen">
-  <div class="title-logo">
+<!-- ===== TITLE ===== -->
+<div class="screen active" id="scr-title">
+  <div style="text-align:center;padding:30px 20px 20px;">
     <div class="title-main">◆ 横綱への道 ◆<br>相撲部屋育成</div>
-    <div class="title-sub">〜 親方になって弟子を育てろ！ 〜</div>
+    <div class="title-sub">〜 親方になって弟子を横綱へ育てろ！ 〜</div>
   </div>
-  <span class="title-dohyo">🏯</span>
-  <div class="title-btn-area">
+  <span class="title-icon">🏯</span>
+  <div style="padding:0 30px;">
     <button class="btn btn-gold" id="btn-new">▶ 新しく始める</button>
     <button class="btn" id="btn-load">◉ 続きから</button>
   </div>
-  <div style="margin-top:auto;text-align:center;font-size:9px;color:#444;padding:16px 0;">
-    横綱への道 v1.0 | LocalStorage セーブ対応
+  <div style="margin-top:auto;text-align:center;font-size:9px;color:var(--gray);padding:14px;">横綱への道 v2.0</div>
+</div>
+
+<!-- ===== CREATE ===== -->
+<div class="screen" id="scr-create">
+  <div class="ghdr">
+    <div class="ghdr-name">力士を作る</div>
+    <div style="font-size:10px;color:var(--gray);">親方として弟子を迎え入れよう</div>
+  </div>
+  <div class="create-scroll">
+    <div class="sec-title">▶ 四股名（しこな）</div>
+    <input type="text" class="ginput" id="inp-name" placeholder="例：山嵐太郎" maxlength="8">
+    <div class="sec-title">▶ 肌の色</div>
+    <div class="sgrid" id="sel-skin"></div>
+    <div class="sec-title">▶ 顔の形</div>
+    <div class="sgrid" id="sel-face"></div>
+    <div class="sec-title">▶ 体格</div>
+    <div class="sgrid" id="sel-body"></div>
+    <div class="sec-title">▶ 性格</div>
+    <div class="sgrid" id="sel-pers"></div>
+    <div id="create-preview" class="pbox" style="font-size:10px;color:var(--gray);line-height:1.9;"></div>
+  </div>
+  <div style="padding:8px;flex-shrink:0;">
+    <button class="btn btn-gold" id="btn-create-start">▶ この力士で入門する！</button>
   </div>
 </div>
 
-<!-- ========== CREATE ========== -->
-<div class="screen" id="create-screen">
-  <div style="overflow-y:auto;flex:1;padding-bottom:10px;">
-    <div class="sec-title">▶ 四股名（しこな）をつける</div>
-    <input type="text" class="game-input" id="inp-name" placeholder="例：山嵐太郎" maxlength="8">
-
-    <div class="sec-title">▶ 体格を選ぶ</div>
-    <div class="select-grid" id="body-select"></div>
-
-    <div class="sec-title">▶ 性格を選ぶ</div>
-    <div class="select-grid" id="pers-select"></div>
-
-    <div id="create-preview" class="pbox" style="font-size:11px;color:var(--gray);line-height:1.8;"></div>
-  </div>
-  <button class="btn btn-gold" id="btn-start">▶ 入門させる！</button>
-</div>
-
-<!-- ========== MAIN (TRAINING) ========== -->
-<div class="screen" id="main-screen">
-  <div class="g-header">
+<!-- ===== MAIN GAME ===== -->
+<div class="screen" id="scr-main">
+  <div class="ghdr">
     <div>
-      <div class="g-header-name" id="h-name">力士名</div>
-      <div class="g-header-rank"><span class="rank-badge" id="h-rank">序ノ口</span></div>
+      <div class="ghdr-name" id="h-name">力士名</div>
+      <div class="ghdr-rank"><span class="rank-badge" id="h-rank">序ノ口</span></div>
     </div>
-    <div class="g-header-center">
+    <div style="text-align:center;">
       <div style="font-size:11px;color:var(--gold3);" id="h-basho">第1場所前</div>
-      <div class="g-header-turn" id="h-turn">稽古 1/6</div>
+      <div style="font-size:10px;color:var(--gray);" id="h-actions">稽古 0/6</div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:9px;color:var(--gray);">年齢</div>
-      <div style="font-size:13px;" id="h-age">18歳</div>
+      <div style="font-size:9px;color:var(--gray);">資金</div>
+      <div style="font-size:11px;color:var(--gold3);" id="h-money">0両</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="train" onclick="switchTab('train')">育成</div>
+    <div class="tab" data-tab="facility" onclick="switchTab('facility')">施設</div>
+    <div class="tab" data-tab="disciples" onclick="switchTab('disciples')">弟子一覧</div>
+  </div>
+
+  <!-- TAB: TRAINING -->
+  <div class="tab-pane active" id="tab-train">
+    <div class="char-area" id="char-area"></div>
+    <div class="disc-sel" id="disc-sel"></div>
+    <div class="scroll pad">
+      <div class="pbox" style="margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <div>
+            <span style="font-size:12px;color:var(--gold3);" id="tr-name-disp">名前</span>
+            <button class="rename-btn" onclick="showRenameModal()">✎ 改名</button>
+          </div>
+          <span style="font-size:10px;color:var(--gray);" id="tr-age-weight">18歳 110kg</span>
+        </div>
+        <div class="name-hist" id="tr-name-hist"></div>
+        <div class="sbar"><span class="sbar-l">体力HP</span><div class="sbar-bg"><div class="sbar-f fc-hp" id="bar-hp"></div></div><span class="sbar-v" id="val-hp">-</span></div>
+        <div class="sbar"><span class="sbar-l">やる気</span><div class="sbar-bg"><div class="sbar-f fc-mot" id="bar-mot"></div></div><span class="sbar-v" id="val-mot">-</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:3px;">
+          <div class="sbar"><span class="sbar-l">筋力</span><div class="sbar-bg"><div class="sbar-f fc-str" id="bar-str"></div></div><span class="sbar-v" id="val-str">-</span></div>
+          <div class="sbar"><span class="sbar-l">体力</span><div class="sbar-bg"><div class="sbar-f fc-end" id="bar-end"></div></div><span class="sbar-v" id="val-end">-</span></div>
+          <div class="sbar"><span class="sbar-l">技術</span><div class="sbar-bg"><div class="sbar-f fc-tec" id="bar-tec"></div></div><span class="sbar-v" id="val-tec">-</span></div>
+          <div class="sbar"><span class="sbar-l">精神</span><div class="sbar-bg"><div class="sbar-f fc-men" id="bar-men"></div></div><span class="sbar-v" id="val-men">-</span></div>
+        </div>
+      </div>
+      <div class="msgbox" id="msg-main" style="margin-bottom:6px;"></div>
+      <div id="train-area">
+        <div class="sec-title">▶ 稽古メニュー（残り<span id="act-left">6</span>回）</div>
+        <div class="cmd-grid" id="cmd-grid"></div>
+      </div>
+      <button class="btn btn-red shimmer" id="btn-to-basho" style="display:none;">▶▶ 場所に出る！</button>
     </div>
   </div>
 
-  <div style="overflow-y:auto;flex:1;">
-    <div class="profile-card">
-      <div class="profile-sprite" id="p-sprite">🤼</div>
-      <div class="profile-info">
-        <div class="profile-name" id="p-name">力士名</div>
-        <div class="profile-detail" id="p-detail">体重:120kg | 18歳</div>
-        <div style="margin-top:5px;">
-          <div class="sbar-wrap">
-            <span class="sbar-lbl">体力HP</span>
-            <div class="sbar-bg"><div class="sbar-fill sbar-fill-hp" id="bar-hp" style="width:100%;"></div></div>
-            <span class="sbar-val" id="val-hp">100</span>
-          </div>
-          <div class="sbar-wrap">
-            <span class="sbar-lbl">やる気</span>
-            <div class="sbar-bg"><div class="sbar-fill sbar-fill-mot" id="bar-mot" style="width:80%;"></div></div>
-            <span class="sbar-val" id="val-mot">80</span>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- TAB: FACILITY -->
+  <div class="tab-pane" id="tab-facility">
+    <div class="money-disp">💴 部屋資金：<span id="fac-money">0</span> 両</div>
+    <div class="scroll pad" id="fac-list"></div>
+  </div>
 
-    <div class="pbox" style="margin-bottom:8px;">
-      <div class="stats-grid">
-        <div class="sbar-wrap">
-          <span class="sbar-lbl">筋　力</span>
-          <div class="sbar-bg"><div class="sbar-fill" id="bar-str" style="width:30%;"></div></div>
-          <span class="sbar-val" id="val-str">30</span>
-        </div>
-        <div class="sbar-wrap">
-          <span class="sbar-lbl">体　力</span>
-          <div class="sbar-bg"><div class="sbar-fill" id="bar-end" style="width:30%;"></div></div>
-          <span class="sbar-val" id="val-end">30</span>
-        </div>
-        <div class="sbar-wrap">
-          <span class="sbar-lbl">技　術</span>
-          <div class="sbar-bg"><div class="sbar-fill" id="bar-tec" style="width:30%;"></div></div>
-          <span class="sbar-val" id="val-tec">30</span>
-        </div>
-        <div class="sbar-wrap">
-          <span class="sbar-lbl">精神力</span>
-          <div class="sbar-bg"><div class="sbar-fill" id="bar-men" style="width:30%;"></div></div>
-          <span class="sbar-val" id="val-men">30</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="msgbox" id="msg-main"></div>
-
-    <div id="training-area" style="margin-top:6px;">
-      <div class="sec-title">▶ 稽古メニュー（残り<span id="turns-left">6</span>回）</div>
-      <div class="cmd-grid" id="cmd-grid"></div>
-    </div>
-
-    <button class="btn btn-red shimmer" id="btn-goto-basho" style="display:none;margin-top:4px;">
-      ▶▶ 場所に出る！
-    </button>
+  <!-- TAB: DISCIPLES -->
+  <div class="tab-pane" id="tab-disciples">
+    <div class="scroll pad" id="disc-list"></div>
   </div>
 </div>
 
-<!-- ========== TOURNAMENT ========== -->
-<div class="screen" id="tournament-screen">
-  <div class="g-header">
+<!-- ===== TOURNAMENT ===== -->
+<div class="screen" id="scr-basho">
+  <div class="ghdr">
     <div>
-      <div class="g-header-name" id="t-name">力士名</div>
-      <div class="g-header-rank"><span class="rank-badge" id="t-rank">序ノ口</span></div>
+      <div class="ghdr-name" id="t-name">力士名</div>
+      <div class="ghdr-rank"><span class="rank-badge" id="t-rank">序ノ口</span></div>
     </div>
-    <div style="text-align:center;font-size:13px;color:var(--gold3);" id="t-basho-title">第1場所</div>
-    <div style="text-align:right;font-size:13px;" id="t-record">0勝0敗</div>
+    <div style="text-align:center;font-size:12px;color:var(--gold3);" id="t-basho-title">第1場所</div>
+    <div style="text-align:right;font-size:12px;" id="t-rec">0勝0敗</div>
   </div>
-
-  <div style="overflow-y:auto;flex:1;">
+  <div class="disc-tab-btns" id="t-disc-tabs"></div>
+  <div class="scroll pad">
     <div class="t-status">
-      <span id="t-day-label">1日目</span>
+      <span id="t-day">1日目</span>
       <span style="color:var(--gold2);">本場所</span>
-      <span id="t-remaining">残り15日</span>
+      <span id="t-remain">残り15日</span>
     </div>
-
-    <div class="record-grid record-grid-15" id="record-grid"></div>
-
+    <div class="rgrid rg15" id="t-rgrid"></div>
     <div class="match-box" id="match-box">
       <div id="match-pre">
-        <div style="font-size:11px;color:var(--gold2);margin-bottom:6px;">本日の取組</div>
-        <div class="vs-row">
-          <div><div class="vs-name" id="t-my-name">-</div><div class="vs-rank" id="t-my-rank">-</div></div>
-          <div class="vs-text">VS</div>
-          <div><div class="vs-name" id="t-opp-name">-</div><div class="vs-rank" id="t-opp-rank">-</div></div>
+        <div style="font-size:10px;color:var(--gold2);margin-bottom:5px;">本日の取組</div>
+        <div class="vsrow">
+          <div><div class="vsname" id="t-my">-</div><div class="vsrank" id="t-my-rank">-</div></div>
+          <div class="vstxt">VS</div>
+          <div><div class="vsname" id="t-opp">-</div><div class="vsrank" id="t-opp-rank">-</div></div>
         </div>
-        <div class="win-prob" id="t-win-prob">予想勝率: -</div>
+        <div style="font-size:10px;color:var(--gray);" id="t-prob">予想勝率:-</div>
       </div>
-      <div id="match-result" style="display:none;">
-        <div class="match-result-big" id="result-big">-</div>
-        <div class="match-tech" id="result-tech">-</div>
+      <div id="match-res" style="display:none;">
+        <div class="result-big" id="res-big">-</div>
+        <div style="font-size:11px;color:var(--gray);" id="res-tech">-</div>
       </div>
     </div>
-
-    <div class="msgbox" id="msg-t"></div>
-
-    <div style="margin-top:6px;">
-      <button class="btn btn-red" id="btn-fight">⚡ 取組！</button>
-      <button class="btn btn-blue" id="btn-auto">≫ 場所を一括進行</button>
-      <button class="btn btn-green shimmer" id="btn-end-basho" style="display:none;">✓ 場所終了 → 結果を見る</button>
-    </div>
+    <div class="msgbox" id="msg-basho" style="margin-bottom:6px;"></div>
+    <button class="btn btn-red" id="btn-fight">⚡ 取組！</button>
+    <button class="btn btn-blue" id="btn-auto">≫ 一括進行</button>
+    <button class="btn btn-green shimmer" id="btn-basho-end" style="display:none;">✓ 場所終了 → 結果へ</button>
   </div>
 </div>
 
-<!-- ========== RESULTS ========== -->
-<div class="screen" id="results-screen">
-  <div class="scroll">
-    <div class="res-center">
-      <div style="font-size:13px;color:var(--gold2);" id="res-basho-label">第1場所 結果</div>
-      <span class="res-big" id="res-emoji">🏆</span>
-      <div class="res-record" id="res-record">0勝0敗</div>
-      <div class="res-comment" id="res-comment">-</div>
-    </div>
-
-    <div class="pbox">
-      <div class="sec-title">▶ 番付変動</div>
-      <div class="res-rank-change" id="res-rank-change">-</div>
-    </div>
-
-    <div class="pbox">
-      <div class="sec-title">▶ 稽古の成果（場所前→現在）</div>
-      <div id="res-growth"></div>
-    </div>
-
-    <div class="pbox" style="font-size:11px;color:var(--gray);line-height:1.9;" id="res-note"></div>
+<!-- ===== RESULTS ===== -->
+<div class="screen" id="scr-results">
+  <div class="scroll pad">
+    <div style="font-size:12px;color:var(--gold2);text-align:center;margin-bottom:6px;" id="res-basho-label">第1場所 結果</div>
+    <div id="disc-results-area"></div>
+    <button class="btn btn-gold" id="btn-next" style="margin-top:6px;">▶ 次の場所に向けて稽古する</button>
   </div>
-  <button class="btn btn-gold" id="btn-next-train" style="margin-top:6px;">▶ 次の場所に向けて稽古する</button>
 </div>
 
-<!-- ========== GAME CLEAR ========== -->
-<div class="screen" id="clear-screen">
-  <div class="end-screen">
+<!-- ===== CLEAR ===== -->
+<div class="screen" id="scr-clear">
+  <div class="end-sc">
     <div class="end-big">🏆</div>
     <div class="end-title" style="color:var(--gold3);">横　綱　昇　進！</div>
     <div class="end-msg" id="clear-msg"></div>
-    <div class="pbox" style="width:100%;font-size:12px;line-height:2.2;" id="clear-stats"></div>
-    <button class="btn btn-gold" id="btn-clear-restart" style="margin-top:10px;">▶ もう一度挑戦する</button>
+    <div class="pbox" style="width:100%;font-size:11px;line-height:2;" id="clear-stats"></div>
+    <button class="btn btn-gold" style="margin-top:10px;" id="btn-clear-restart">▶ もう一度挑戦する</button>
   </div>
 </div>
 
-<!-- ========== GAME OVER ========== -->
-<div class="screen" id="gameover-screen">
-  <div class="end-screen">
+<!-- ===== GAMEOVER ===== -->
+<div class="screen" id="scr-gameover">
+  <div class="end-sc">
     <div class="end-big">😢</div>
     <div class="end-title" style="color:var(--red3);">引　退...</div>
     <div class="end-msg" id="go-msg"></div>
-    <button class="btn btn-gold" id="btn-retry" style="margin-top:10px;">▶ もう一度挑戦する</button>
+    <button class="btn btn-gold" style="margin-top:10px;" id="btn-retry">▶ もう一度挑戦する</button>
   </div>
 </div>
 
 </div><!-- /game -->
 
-<!-- ========== MODAL ========== -->
-<div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <span class="modal-emoji" id="modal-emoji">📢</span>
+<!-- ===== MODAL ===== -->
+<div class="modal-ov" id="modal">
+  <div class="modal-bx">
+    <span class="modal-em" id="modal-em">📢</span>
     <div class="modal-title" id="modal-title">イベント！</div>
     <div class="modal-text" id="modal-text">内容</div>
-    <button class="btn btn-gold btn-sm" id="btn-modal-ok">▶ OK</button>
+    <div class="modal-choices" id="modal-choices"></div>
   </div>
 </div>
 
@@ -593,731 +385,1537 @@ body{
 //  CONSTANTS
 // ================================================================
 const RANKS=[
-  {id:0,name:'序ノ口',  matches:7,  upWins:4,  downWins:3,emoji:'🔰'},
-  {id:1,name:'序二段',  matches:7,  upWins:4,  downWins:3,emoji:'🟤'},
-  {id:2,name:'三段目',  matches:7,  upWins:4,  downWins:3,emoji:'⚪'},
-  {id:3,name:'幕下',    matches:7,  upWins:4,  downWins:3,emoji:'🟡'},
-  {id:4,name:'十両',    matches:15, upWins:8,  downWins:7,emoji:'🔵'},
-  {id:5,name:'前頭',    matches:15, upWins:9,  downWins:7,emoji:'🟢'},
-  {id:6,name:'小結',    matches:15, upWins:10, downWins:7,emoji:'🟠'},
-  {id:7,name:'関脇',    matches:15, upWins:11, downWins:7,emoji:'🔴'},
-  {id:8,name:'大関',    matches:15, upWins:13, downWins:7,emoji:'💜'},
-  {id:9,name:'横綱',    matches:15, upWins:999,downWins:7,emoji:'⭐'},
+  {id:0,name:'序ノ口',  maxPos:10, matches:7,  upWins:4,  kanto:false},
+  {id:1,name:'序二段',  maxPos:100,matches:7,  upWins:4,  kanto:false},
+  {id:2,name:'三段目',  maxPos:100,matches:7,  upWins:4,  kanto:false},
+  {id:3,name:'幕下',    maxPos:60, matches:7,  upWins:4,  kanto:false},
+  {id:4,name:'十両',    maxPos:14, matches:15, upWins:8,  kanto:true},
+  {id:5,name:'前頭',    maxPos:17, matches:15, upWins:8,  kanto:true},
+  {id:6,name:'小結',    maxPos:1,  matches:15, upWins:10, kanto:true},
+  {id:7,name:'関脇',    maxPos:1,  matches:15, upWins:11, kanto:true},
+  {id:8,name:'大関',    maxPos:1,  matches:15, upWins:13, kanto:true},
+  {id:9,name:'横綱',    maxPos:1,  matches:15, upWins:999,kanto:true},
 ];
 
-const BODY_TYPES=[
-  {id:'power',name:'剛力型',emoji:'💪',desc:'筋力が高い\n押し・つき系が得意',
-   stats:{str:50,end:32,tec:22,men:26,weight:133,hp:90}},
-  {id:'tech', name:'技巧型',emoji:'⚡',desc:'技術が高い\n変化・投げ技が得意',
-   stats:{str:26,end:32,tec:50,men:32,weight:108,hp:90}},
-  {id:'balance',name:'均整型',emoji:'⚖️',desc:'バランスが良い\n万能型で育てやすい',
-   stats:{str:35,end:35,tec:35,men:35,weight:118,hp:100}},
-  {id:'heavy',name:'重量型',emoji:'🏔️',desc:'体力・体重が高い\n粘り強い相撲',
-   stats:{str:32,end:50,tec:22,men:26,weight:148,hp:110}},
+const SKINS=[
+  {id:'fair', name:'白肌',  col:'#F5C5A0',emoji:'⬜'},
+  {id:'wheat',name:'小麦色',col:'#C88540',emoji:'🟧'},
+  {id:'tan',  name:'褐色',  col:'#8B5E3C',emoji:'🟫'},
+  {id:'dark', name:'黒褐色',col:'#4A2E1A',emoji:'⬛'},
 ];
-
-const PERSONALITIES=[
-  {id:'earnest',name:'努力家',emoji:'📚',
-   desc:'稽古の効果+20%\n地道にコツコツ伸びる',special:'earnest'},
-  {id:'genius', name:'天才肌',emoji:'✨',
-   desc:'稽古の効果にムラあり\n大爆発することも！',special:'genius'},
-  {id:'mental', name:'精神的強さ',emoji:'🔥',
-   desc:'精神力特化\n本番で実力以上を発揮',special:'mental'},
-  {id:'quick',  name:'俊敏',emoji:'🌪️',
-   desc:'技術習得が早い\n技稽古の効果+50%',special:'quick'},
+const FACES=[
+  {id:'round', name:'丸顔', desc:'おだやかな印象',emoji:'😊'},
+  {id:'long',  name:'面長', desc:'クールな印象',  emoji:'😐'},
+  {id:'square',name:'四角顔',desc:'力強い印象',  emoji:'😤'},
+  {id:'baby',  name:'童顔', desc:'愛嬌がある',   emoji:'😄'},
+];
+const BODIES=[
+  {id:'normal',  name:'ノーマル', desc:'バランス型\n伸びしろが大きい',
+   stats:{str:60,end:60,tec:60,men:60,weight:110,hp:100}},
+  {id:'heavy',   name:'太めスタート',desc:'体重が多い\n体力・筋力有利',
+   stats:{str:70,end:80,tec:40,men:50,weight:140,hp:110}},
+  {id:'muscle',  name:'筋肉質',desc:'筋力が高い\n技術が伸びやすい',
+   stats:{str:90,end:60,tec:55,men:55,weight:120,hp:100}},
+  {id:'light',   name:'細身',  desc:'技術が高い\n軽さを活かす相撲',
+   stats:{str:45,end:55,tec:90,men:70,weight:88, hp:90}},
+];
+const PERS=[
+  {id:'earnest',name:'努力家',  emoji:'📚',desc:'稽古効果+25%\nコツコツ型',special:'earnest'},
+  {id:'genius', name:'天才肌',  emoji:'✨',desc:'稽古にムラあり\n大爆発あり！',special:'genius'},
+  {id:'mental', name:'精神的強さ',emoji:'🔥',desc:'精神力特化\n本番で輝く',special:'mental'},
+  {id:'quick',  name:'技巧派',  emoji:'🌪️',desc:'技術習得+60%\n小技が得意',special:'quick'},
 ];
 
 const CMDS=[
-  {id:'basic',name:'基礎稽古', emoji:'🥋',
-   eff:'全能力+2〜4',cost:'HP -10',hpCost:10,
-   g:{str:[1,4],end:[1,4],tec:[1,4],men:[1,4]},cls:''},
-  {id:'weight',name:'筋トレ',   emoji:'🏋️',
-   eff:'筋力+5〜9',cost:'HP -20',hpCost:20,
-   g:{str:[5,9],end:[0,2],tec:[0,1],men:[0,1]},cls:''},
-  {id:'shiko', name:'四股踏み', emoji:'🦵',
-   eff:'体力+5〜9 技術+2',cost:'HP -15',hpCost:15,
-   g:{str:[0,2],end:[5,9],tec:[1,3],men:[0,2]},cls:''},
-  {id:'butsu', name:'ぶつかり', emoji:'⚡',
-   eff:'技術+5〜9 精神+3',cost:'HP -25',hpCost:25,
-   g:{str:[1,3],end:[0,2],tec:[5,9],men:[2,5]},cls:'cmd-special'},
-  {id:'zen',   name:'座禅修行', emoji:'🧘',
-   eff:'精神力+6〜10',cost:'HP -10',hpCost:10,
-   g:{str:[0,1],end:[0,1],tec:[0,1],men:[6,10]},cls:''},
-  {id:'degeiko',name:'出稽古',  emoji:'🏟️',
-   eff:'全能力+3〜6 やる気+',cost:'HP -20',hpCost:20,
-   g:{str:[2,6],end:[2,6],tec:[2,6],men:[2,6]},cls:'cmd-special'},
-  {id:'rest',  name:'休　養',   emoji:'💤',
-   eff:'HP +50 回復',cost:'HP 回復',hpCost:-50,
-   g:{str:[0,0],end:[0,0],tec:[0,0],men:[0,0]},cls:'cmd-rest'},
+  {id:'basic',  name:'基礎稽古', em:'🥋',eff:'全能力+1〜4', cost:'HP-10', hp:10,
+   g:{str:[0,3],end:[0,3],tec:[0,3],men:[0,3]},cls:''},
+  {id:'weight', name:'筋トレ',   em:'🏋️',eff:'筋力+3〜8',  cost:'HP-18', hp:18,
+   g:{str:[3,8],end:[0,2],tec:[0,1],men:[0,1]},cls:''},
+  {id:'shiko',  name:'四股踏み', em:'🦵',eff:'体力+3〜8 技術+2',cost:'HP-15',hp:15,
+   g:{str:[0,2],end:[3,8],tec:[1,3],men:[0,2]},cls:''},
+  {id:'butsu',  name:'ぶつかり', em:'⚡',eff:'技術+4〜9 精神+3',cost:'HP-22',hp:22,
+   g:{str:[1,3],end:[0,2],tec:[4,9],men:[2,5]},cls:'csp'},
+  {id:'zen',    name:'座禅修行', em:'🧘',eff:'精神力+5〜10',cost:'HP-8', hp:8,
+   g:{str:[0,1],end:[0,1],tec:[0,1],men:[5,10]},cls:''},
+  {id:'degeiko',name:'出稽古',   em:'🏟️',eff:'全能力+2〜6 やる気+',cost:'HP-20',hp:20,
+   g:{str:[1,5],end:[1,5],tec:[1,5],men:[1,5]},cls:'csp'},
+  {id:'chanko', name:'ちゃんこ', em:'🍲',eff:'体重+ 体力+',cost:'HP-5', hp:5,
+   g:{str:[0,1],end:[1,4],tec:[0,0],men:[0,1]},cls:'',weight:true},
+  {id:'rest',   name:'休　養',   em:'💤',eff:'HP+55 回復',  cost:'HP回復',hp:-55,
+   g:{str:[0,0],end:[0,0],tec:[0,0],men:[0,0]},cls:'crs'},
 ];
 
+const FACILITIES=[
+  {id:'dojo',   name:'稽古場',   em:'🥋',
+   descs:['稽古効果+10%','稽古効果+25%','稽古効果+40%'],
+   costs:[300,800,2000]},
+  {id:'chanko', name:'ちゃんこ場',em:'🍲',
+   descs:['食事効果+15%','食事効果+35%','食事効果+60%'],
+   costs:[200,600,1500]},
+  {id:'bath',   name:'風呂・サウナ',em:'♨️',
+   descs:['回復量+15%','回復量+35%','回復量+60%'],
+   costs:[250,700,1800]},
+  {id:'medical',name:'医務室',   em:'🏥',
+   descs:['怪我回復+1','怪我回復+2','怪我回復即時'],
+   costs:[400,1000,2500]},
+  {id:'scout',  name:'スカウト網',em:'🔭',
+   descs:['弟子候補+1能力','弟子候補+2能力','精鋭候補出現'],
+   costs:[300,900,2200]},
+];
+
+// Random events
 const EVENTS=[
-  {title:'師匠の特訓！',emoji:'👨‍🏫',type:'good',
-   text:'師匠が直々に特訓してくれた！\n全能力が大きく伸びた！',
-   fn:w=>{w.str=cap(w.str+rnd(3,8));w.end=cap(w.end+rnd(3,8));w.tec=cap(w.tec+rnd(3,8));w.men=cap(w.men+rnd(3,8));}},
-  {title:'軽い怪我...',emoji:'🩹',type:'bad',
-   text:'稽古中に捻挫してしまった。\n体力が少し下がった...',
-   fn:w=>{w.hp=Math.max(10,w.hp-25);}},
-  {title:'ライバル出現！',emoji:'🔥',type:'good',
-   text:'強力なライバルが現れた！\nやる気と精神力が上がった！',
-   fn:w=>{w.mot=cap2(w.mot+20);w.men=cap(w.men+5);}},
-  {title:'後援会の激励！',emoji:'🎉',type:'good',
-   text:'後援会の方々が応援してくれた！\nやる気が大きく上がった！',
-   fn:w=>{w.mot=cap2(w.mot+30);}},
-  {title:'新技のひらめき！',emoji:'💡',type:'good',
-   text:'ふとひらめいた！\n技術が大幅アップ！',
-   fn:w=>{w.tec=cap(w.tec+rnd(5,12));}},
-  {title:'食事管理成功！',emoji:'🍱',type:'good',
-   text:'食事制限が功を奏した！\n体力と技術が向上した！',
-   fn:w=>{w.end=cap(w.end+rnd(3,6));w.tec=cap(w.tec+rnd(3,6));}},
-  {title:'スランプ...',emoji:'😔',type:'bad',
-   text:'調子が上がらない日が続いた。\nやる気が下がった...',
-   fn:w=>{w.mot=Math.max(20,w.mot-20);}},
-  {title:'肉体強化！',emoji:'💪',type:'good',
-   text:'特別なトレーニングで体が大きくなった！\n筋力と体重が増えた！',
-   fn:w=>{w.str=cap(w.str+rnd(4,8));w.weight=Math.min(200,w.weight+rnd(2,5));}},
-  {title:'雑誌の取材！',emoji:'📰',type:'good',
-   text:'相撲雑誌の取材が来た！\nやる気がアップし、精神力も磨かれた！',
-   fn:w=>{w.mot=cap2(w.mot+15);w.men=cap(w.men+3);}},
-  {title:'稽古仲間が骨折...', emoji:'😰',type:'bad',
-   text:'稽古仲間が怪我をして休場。\nショックでやる気が少し下がった。',
-   fn:w=>{w.mot=Math.max(20,w.mot-10);}},
+  {t:'師匠の特訓！',em:'👨‍🏫',type:'good',
+   txt:'師匠が直々に特訓してくれた！\n全能力が大きく伸びた！',
+   fn:d=>{const b=rnd(8,18);d.str=gc(d.str+b,d.strCap);d.end=gc(d.end+b,d.endCap);d.tec=gc(d.tec+b,d.tecCap);d.men=gc(d.men+b,d.menCap);}},
+  {t:'捻挫してしまった...',em:'🩹',type:'bad',
+   txt:'稽古中に足首を捻った。\nしばらく稽古の効果が下がる。',
+   fn:d=>{d.injury={severity:'light',remaining:3};d.hp=Math.max(10,d.hp-20);}},
+  {t:'ライバル出現！',em:'🔥',type:'good',
+   txt:'強力なライバルが出てきた！\n燃えてきた！やる気と精神力が上がった！',
+   fn:d=>{d.mot=cl2(d.mot+25);d.men=gc(d.men+rnd(5,12),d.menCap);}},
+  {t:'後援会の激励！',em:'🎉',type:'good',
+   txt:'後援会の皆さんが応援に来てくれた！\nやる気が大きく上がった！',
+   fn:d=>{d.mot=cl2(d.mot+30);}},
+  {t:'新技のひらめき！',em:'💡',type:'good',
+   txt:'稽古中にひらめいた！\n新しい技を習得！技術が大幅アップ！',
+   fn:d=>{d.tec=gc(d.tec+rnd(10,22),d.tecCap);}},
+  {t:'食が細くなった...',em:'😔',type:'bad',
+   txt:'精神的に追い詰められて食欲がない。\nやる気が下がった...',
+   fn:d=>{d.mot=Math.max(20,d.mot-22);}},
+  {t:'肉体強化！',em:'💪',type:'good',
+   txt:'特別なトレーニングで体が大きくなった！\n筋力と体重が増えた！',
+   fn:d=>{d.str=gc(d.str+rnd(8,16),d.strCap);d.weight=Math.min(220,d.weight+rnd(2,6));}},
+  {t:'相撲雑誌の取材！',em:'📰',type:'good',
+   txt:'「これからの逸材」として取材を受けた！\nやる気と精神力が上がった！',
+   fn:d=>{d.mot=cl2(d.mot+18);d.men=gc(d.men+rnd(5,10),d.menCap);}},
+  {t:'肉離れ！',em:'😰',type:'bad',
+   txt:'稽古中に肉離れを起こした！\n今場所は全力が出せないかもしれない。',
+   fn:d=>{d.injury={severity:'heavy',remaining:5};d.hp=Math.max(5,d.hp-35);}},
+  {t:'早朝特訓で気づき！',em:'🌅',type:'good',
+   txt:'早朝の一人稽古で大きな気づきを得た！\n技術と精神力が同時に伸びた！',
+   fn:d=>{d.tec=gc(d.tec+rnd(5,12),d.tecCap);d.men=gc(d.men+rnd(5,12),d.menCap);}},
+  {t:'スランプ...',em:'💧',type:'bad',
+   txt:'何をやってもうまくいかない...\nやる気がかなり下がった。',
+   fn:d=>{d.mot=Math.max(15,d.mot-28);}},
+  {t:'合宿稽古！',em:'🏕️',type:'good',
+   txt:'他部屋との合宿稽古で刺激を受けた！\n全能力が少し伸びた！',
+   fn:d=>{const b=rnd(3,7);d.str=gc(d.str+b,d.strCap);d.end=gc(d.end+b,d.endCap);d.tec=gc(d.tec+b,d.tecCap);d.men=gc(d.men+b,d.menCap);}},
+];
+
+const SCOUT_EVENTS=[
+  {t:'新入門の相談',em:'🌟',
+   txt:'近くの中学校から相撲の才能がある少年が\n入門を希望しています。受け入れますか？'},
+  {t:'県大会優勝者が入門希望',em:'🥇',
+   txt:'県大会で優勝した選手が入門を希望！\n初期能力が高めです。受け入れますか？'},
+  {t:'体格抜群の少年',em:'💪',
+   txt:'体格が抜群に良い少年が入門希望。\nまだ相撲は初心者ですが将来性あり！'},
+];
+
+const SPONSOR_EVENTS=[
+  {name:'山田商会',amount:50,em:'🏢',txt:'地元の山田商会がスポンサーになりたいと\n申し出ています。受諾しますか？'},
+  {name:'東洋建設',amount:80,em:'🏗️',txt:'東洋建設がスポンサーを申し出ています。\n毎場所後に資金ボーナスがあります。'},
+  {name:'大黒屋',  amount:60,em:'🍶',txt:'老舗の大黒屋がスポンサーを希望。\n和風の応援が入ります。'},
 ];
 
 const WAZA=['押し出し','突き出し','寄り切り','上手投げ','下手投げ',
-  '吊り出し','掬い投げ','外掛け','内掛け','足取り',
-  '叩き込み','はたき込み','浴びせ倒し','送り出し','肩透かし',
-  '突き落とし','引き落とし','上手出し投げ','下手出し投げ','首投げ'];
+  '吊り出し','掬い投げ','外掛け','内掛け','足取り','叩き込み',
+  'はたき込み','浴びせ倒し','送り出し','肩透かし','突き落とし',
+  '引き落とし','上手出し投げ','首投げ','腸返し'];
 
-const OPP_PRE=['山','海','龍','鷹','風','鬼','虎','鉄','雷','翔',
-  '武','力','岩','浪','熊','湊','錦','宝','旭','朝'];
-const OPP_SUF=['龍','鵬','海','山','嶋','錦','富士','桜','岩','流',
-  '丸','国','洋','翔','虎','獅子','岳','丘','波','嵐'];
+const OPP_PRE=['山','海','龍','鷹','風','鬼','虎','鉄','雷','翔','武','力','岩','浪','熊','湊','錦','宝','旭','朝','大','若','千','豊','花'];
+const OPP_SUF=['龍','鵬','海','山','嶋','錦','富士','桜','岩','流','丸','国','洋','翔','虎','獅子','岳','丘','波','嵐','光','彦','之進','太郎'];
 
 // ================================================================
 //  STATE
 // ================================================================
-let gs=null;
-let selBody='balance';
-let selPers='earnest';
+let GS=null;
 
-function newState(name,body,pers){
-  const bt=BODY_TYPES.find(b=>b.id===body);
+function newDisciple(name,skinColor,faceType,bodyType,personality,isGenerated=false){
+  const bt=BODIES.find(b=>b.id===bodyType)||BODIES[0];
+  const s=bt.stats;
+  // Hidden caps: base 500-800 per stat, random variation
+  const capBase=isGenerated?rnd(450,750):rnd(500,800);
   return {
-    w:{
-      name,body,pers,
-      age:18,rank:0,
-      hp:bt.stats.hp, maxHp:bt.stats.hp,
-      str:bt.stats.str, end:bt.stats.end,
-      tec:bt.stats.tec, men:bt.stats.men,
-      weight:bt.stats.weight,
-      mot:80,
-    },
+    id: Date.now()+rnd(0,9999),
+    name, skinColor, faceType, bodyType, personality,
+    age:18,
+    rank:0, pos:RANKS[0].maxPos,
+    hp:s.hp, maxHp:s.hp,
+    str:s.str, end:s.end, tec:s.tec, men:s.men,
+    strCap:capBase+rnd(-50,100),
+    endCap:capBase+rnd(-50,100),
+    tecCap:capBase+rnd(-50,100),
+    menCap:capBase+rnd(-50,100),
+    weight:s.weight,
+    mot:80,
+    injury:null,
+    overTrain:0,
+    wins:0, losses:0,
+    statsSnap:null,
+    tourResult:null,
+    nameHistory:[name],
+    ozekiMakekoshi:0,
+    ozekiTsunaCount:0,
+    yokozunaMakekoshi:0,
+    retired:false,
+  };
+}
+
+
+function newGame(name,skin,face,body,pers){
+  const d=newDisciple(name,skin,face,body,pers);
+  GS={
+    disciples:[d],
+    focusIdx:0,
+    facilities:{dojo:1,chanko:1,bath:1,medical:1,scout:1},
+    money:150,
     basho:0,
-    trainTurn:0,
-    maxTrainTurns:6,
     phase:'training',
     tour:null,
-    statsSnap:null,
-    totalWins:0,
-    totalLoss:0,
-    retired:false,
+    actLeft:6,
+    actTotal:6,
+    sponsors:[],
+    rival:null,
+    nextScout:3,
+    nextSponsor:2,
   };
 }
 
 // ================================================================
 //  SAVE / LOAD
 // ================================================================
-const SAVE_KEY='sumo_beya_v1';
-function save(){if(gs)localStorage.setItem(SAVE_KEY,JSON.stringify(gs));}
-function load(){const d=localStorage.getItem(SAVE_KEY);if(d){try{gs=JSON.parse(d);return true;}catch(e){}}return false;}
-function clearSave(){localStorage.removeItem(SAVE_KEY);}
+const SK='sumo_beya_v2';
+function saveGame(){if(GS)localStorage.setItem(SK,JSON.stringify(GS));}
+function loadGame(){
+  const raw=localStorage.getItem(SK);
+  if(raw){
+    try{
+      GS=JSON.parse(raw);
+      // Migrate old saves
+      if(GS.disciples){
+        GS.disciples.forEach(d=>{
+          if(!d.nameHistory) d.nameHistory=[d.name];
+          if(d.ozekiTsunaCount==null) d.ozekiTsunaCount=0;
+          if(d.yokozunaMakekoshi==null) d.yokozunaMakekoshi=0;
+        });
+      }
+      return true;
+    }catch(e){}
+  }
+  return false;
+}
+function clearSave(){localStorage.removeItem(SK);}
 
 // ================================================================
-//  UTIL
+//  UTILITIES
 // ================================================================
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function cap(v){return Math.max(0,Math.min(100,v));}
-function cap2(v){return Math.max(0,Math.min(100,v));}
-function oppName(){
-  return OPP_PRE[rnd(0,OPP_PRE.length-1)]+OPP_SUF[rnd(0,OPP_SUF.length-1)];
+function gc(v,cap){return Math.max(0,Math.min(cap||999,v));} // grow capped
+function cl2(v){return Math.max(0,Math.min(100,v));}         // clamp motivation
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+function rankDisplay(d){
+  const r=RANKS[d.rank];
+  if(d.rank>=6) return r.name; // 小結以上は枚数なし
+  return `${r.name}${d.pos}枚目`;
 }
-function rankName(){return RANKS[gs.w.rank].name;}
+
+function rankScore(d){
+  // Lower = worse rank. Used to compare rank order
+  const r=RANKS[d.rank];
+  return d.rank*10000 + (r.maxPos - d.pos);
+}
+
+function getP(d){return PERS.find(p=>p.id===d.personality)||PERS[0];}
+function getB(d){return BODIES.find(b=>b.id===d.bodyType)||BODIES[0];}
+function getSkin(d){return SKINS.find(s=>s.id===d.skinColor)||SKINS[0];}
 
 // ================================================================
-//  MESSAGES
+//  CHARACTER RENDERER (CSS div pixel art – v3 human-like 200×260)
 // ================================================================
-let curMsgBox='msg-main';
-function addMsg(text,cls='normal'){
-  const box=document.getElementById(curMsgBox);
-  if(!box)return;
-  const br=document.createElement('br');
-  const sp=document.createElement('span');
-  sp.className='msg-'+cls;
-  sp.textContent=text;
-  box.appendChild(br);
-  box.appendChild(sp);
-  box.scrollTop=box.scrollHeight;
+function renderChar(d, size='lg'){
+  const skinMap={fair:'#F5C5A0',wheat:'#C88540',tan:'#8B5E3C',dark:'#4A2E1A'};
+  const skin=skinMap[d.skinColor]||'#F5C5A0';
+  // Slightly darker skin for shadows/outline
+  const skinD={fair:'#D9A070',wheat:'#A06020',tan:'#6B4020',dark:'#301808'}[d.skinColor]||'#D9A070';
+
+  const sm=size==='sm';
+  const sc=sm?0.5:1; // scale factor
+  const s=v=>Math.round(v*sc); // helper
+
+  const FW=s(200), FH=s(260);
+  const CX=FW/2;
+
+  const w=d.weight;
+  const str=d.str;
+
+  // Body width scales with weight
+  const bW=clamp(s(60+(Math.max(0,w-80)*0.42)),s(48),s(110));
+  const bellyEx=w>120?Math.min(s(26),s((w-120)*0.42)):0;
+
+  // Arm width scales with strength
+  const uArmW=clamp(s(str>=600?24:str>=300?19:str>=100?15:12),s(10),s(26));
+  const fArmW=Math.round(uArmW*0.82);
+  const uArmH=s(38), fArmH=s(30);
+
+  const thW=clamp(s(str>=400?27:22),s(18),s(34));
+  const thH=s(34), caH=s(24);
+
+  const mawColor=d.rank>=9?'#E8C030':d.rank>=4?'#9B1B30':'#7A5C14';
+  const hasTopknot=d.rank>=4; // 関取以上は大銀杏
+  const hasTsuna=d.rank>=9;
+  const faceType=d.faceType||'round';
+  const isLowHp=d.hp<(d.maxHp*0.3);
+
+  // Head dimensions
+  const headW=s(faceType==='square'?52:faceType==='long'?44:faceType==='baby'?48:48);
+  const headH=s(faceType==='long'?60:faceType==='baby'?46:52);
+  const headBR=faceType==='round'?'48% 48% 44% 44%':faceType==='square'?`${s(6)}px`:faceType==='baby'?'50% 50% 46% 46%':'36% 36% 40% 40%';
+
+  // Y positions (top-down layout)
+  const hairY=s(12);
+  const hy=hasTopknot?s(30):s(14); // head top
+  const neckY=hy+headH;
+  const shoulderY=neckY+s(10);
+  const bodyY=shoulderY+s(4);
+  const bH=s(60);
+  const mawY=bodyY+bH-s(4);
+  const mawH=s(18);
+  const legY=mawY+mawH+s(2);
+  const legGap=s(6);
+
+  const hx=CX-Math.round(headW/2);
+
+  let h=`<div style="position:relative;width:${FW}px;height:${FH}px;flex-shrink:0;">`;
+
+  // ── Topknot / Chonmage ──
+  if(hasTopknot){
+    // 大銀杏: fan-shaped bun
+    const knW=s(28), knH=s(16);
+    const kx=CX-Math.round(knW/2), ky=hy-s(16);
+    h+=`<div style="position:absolute;left:${kx}px;top:${ky}px;width:${knW}px;height:${knH}px;background:#1a1210;border-radius:${s(14)}px ${s(14)}px ${s(4)}px ${s(4)}px;"></div>`;
+    // stem
+    h+=`<div style="position:absolute;left:${CX-s(4)}px;top:${ky+knH}px;width:${s(8)}px;height:${s(8)}px;background:#1a1210;border-radius:${s(2)}px;"></div>`;
+    // hair on head
+    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${s(16)}px;background:#1a1210;border-radius:${s(headW/2)}px ${s(headW/2)}px 0 0;"></div>`;
+  } else {
+    // 若い力士: thin chonmage (stalk + small knot)
+    const stalkH=s(14);
+    h+=`<div style="position:absolute;left:${CX-s(3)}px;top:${hairY}px;width:${s(6)}px;height:${stalkH}px;background:#1a1210;border-radius:${s(3)}px;"></div>`;
+    h+=`<div style="position:absolute;left:${CX-s(7)}px;top:${hairY}px;width:${s(14)}px;height:${s(10)}px;background:#1a1210;border-radius:50%;"></div>`;
+    // hair fringe
+    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${s(13)}px;background:#1a1210;border-radius:${s(headW/2)}px ${s(headW/2)}px 0 0;"></div>`;
+  }
+
+  // ── Head ──
+  h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${headH}px;background:${skin};border-radius:${headBR};"></div>`;
+
+  // Low HP: bluish/pale face tint
+  if(isLowHp){
+    h+=`<div style="position:absolute;left:${hx}px;top:${hy}px;width:${headW}px;height:${headH}px;background:rgba(100,130,200,.22);border-radius:${headBR};pointer-events:none;"></div>`;
+  }
+
+  // ── Face features ──
+  const faceTop=hy;
+  const eyeY=faceTop+Math.round(headH*0.44);
+  const eyeOff=s(faceType==='baby'?9:10);
+  const eyeW=sm?4:9, eyeH=sm?3:8;
+  const pupW=sm?2:5, pupH=sm?3:6;
+
+  // Eyebrows
+  if(!sm){
+    const browY=eyeY-s(7);
+    const browW=s(10);
+    h+=`<div style="position:absolute;left:${CX-eyeOff-s(1)}px;top:${browY}px;width:${browW}px;height:${s(3)}px;background:#3a2a18;border-radius:2px;transform:rotate(-5deg);"></div>`;
+    h+=`<div style="position:absolute;left:${CX+eyeOff-s(9)}px;top:${browY}px;width:${browW}px;height:${s(3)}px;background:#3a2a18;border-radius:2px;transform:rotate(5deg);"></div>`;
+  }
+
+  // Eyes (white oval + dark pupil)
+  h+=`<div style="position:absolute;left:${CX-eyeOff-Math.round(eyeW/2)}px;top:${eyeY}px;width:${eyeW}px;height:${eyeH}px;background:#f8f8f0;border-radius:50%;border:1px solid #5a4030;"></div>`;
+  h+=`<div style="position:absolute;left:${CX-eyeOff-Math.round(pupW/2)}px;top:${eyeY+Math.round((eyeH-pupH)/2)}px;width:${pupW}px;height:${pupH}px;background:#1a1210;border-radius:50%;"></div>`;
+  h+=`<div style="position:absolute;left:${CX+eyeOff-Math.round(eyeW/2)}px;top:${eyeY}px;width:${eyeW}px;height:${eyeH}px;background:#f8f8f0;border-radius:50%;border:1px solid #5a4030;"></div>`;
+  h+=`<div style="position:absolute;left:${CX+eyeOff-Math.round(pupW/2)}px;top:${eyeY+Math.round((eyeH-pupH)/2)}px;width:${pupW}px;height:${pupH}px;background:#1a1210;border-radius:50%;"></div>`;
+
+  // Nose
+  if(!sm){
+    h+=`<div style="position:absolute;left:${CX-s(2)}px;top:${eyeY+s(9)}px;width:${s(4)}px;height:${s(3)}px;background:${skinD};border-radius:50%;"></div>`;
+  }
+
+  // Mouth
+  const mouthY=faceTop+Math.round(headH*0.74);
+  const mouthW=sm?5:s(14);
+  h+=`<div style="position:absolute;left:${CX-Math.round(mouthW/2)}px;top:${mouthY}px;width:${mouthW}px;height:${sm?2:s(3)}px;background:#8b5540;border-radius:${s(2)}px;"></div>`;
+
+  // Cheeks (for baby face or heavy bodies)
+  if(!sm&&(faceType==='baby'||w>=140)){
+    h+=`<div style="position:absolute;left:${CX-eyeOff-s(6)}px;top:${eyeY+s(4)}px;width:${s(10)}px;height:${s(6)}px;background:rgba(220,120,100,.28);border-radius:50%;"></div>`;
+    h+=`<div style="position:absolute;left:${CX+eyeOff-s(4)}px;top:${eyeY+s(4)}px;width:${s(10)}px;height:${s(6)}px;background:rgba(220,120,100,.28);border-radius:50%;"></div>`;
+  }
+
+  // ── Neck ──
+  const nkW=s(20);
+  h+=`<div style="position:absolute;left:${CX-Math.round(nkW/2)}px;top:${neckY}px;width:${nkW}px;height:${s(12)}px;background:${skin};"></div>`;
+
+  // ── Shoulder bar (slightly wider than torso) ──
+  const shW=bW+s(6);
+  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)}px;top:${shoulderY}px;width:${shW}px;height:${s(8)}px;background:${skin};border-radius:${s(4)}px ${s(4)}px 0 0;"></div>`;
+
+  // ── Arms (upper + forearm, two segments) ──
+  const armStartY=shoulderY+s(4);
+  // Left arm
+  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-uArmW}px;top:${armStartY}px;width:${uArmW}px;height:${uArmH}px;background:${skin};border-radius:${s(4)}px 0 0 ${s(4)}px;"></div>`;
+  h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-fArmW}px;top:${armStartY+uArmH}px;width:${fArmW}px;height:${fArmH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
+  // Right arm
+  h+=`<div style="position:absolute;left:${CX+Math.round(shW/2)}px;top:${armStartY}px;width:${uArmW}px;height:${uArmH}px;background:${skin};border-radius:0 ${s(4)}px ${s(4)}px 0;"></div>`;
+  h+=`<div style="position:absolute;left:${CX+Math.round(shW/2)+uArmW-fArmW}px;top:${armStartY+uArmH}px;width:${fArmW}px;height:${fArmH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
+
+  // Injury taping on arm (white strip)
+  if(d.injury&&d.injury.remaining>0&&!sm){
+    const tapY=armStartY+Math.round(uArmH*0.4);
+    h+=`<div style="position:absolute;left:${CX-Math.round(shW/2)-uArmW-1}px;top:${tapY}px;width:${uArmW+2}px;height:${s(5)}px;background:rgba(255,255,230,.85);border:1px solid #d0c8a0;"></div>`;
+  }
+
+  // ── Torso ──
+  h+=`<div style="position:absolute;left:${CX-Math.round(bW/2)}px;top:${bodyY}px;width:${bW}px;height:${bH}px;background:${skin};"></div>`;
+
+  // Belly extension (heavy body type)
+  if(bellyEx>0){
+    const bxW=bW+bellyEx*2;
+    h+=`<div style="position:absolute;left:${CX-Math.round(bxW/2)}px;top:${bodyY+Math.round(bH*0.5)}px;width:${bxW}px;height:${bellyEx+s(6)}px;background:${skin};border-radius:0 0 45% 45%;"></div>`;
+  }
+
+  // ── Mawashi ──
+  const mawW=bW+uArmW*2;
+  const mawX=CX-Math.round(mawW/2);
+  h+=`<div style="position:absolute;left:${mawX}px;top:${mawY}px;width:${mawW}px;height:${mawH}px;background:${mawColor};"></div>`;
+  // Mawashi accent stripe
+  if(!sm){
+    const ac=d.rank>=9?'rgba(255,255,200,.35)':'rgba(255,255,255,.18)';
+    h+=`<div style="position:absolute;left:${mawX+s(4)}px;top:${mawY+s(3)}px;width:${mawW-s(8)}px;height:${s(3)}px;background:${ac};border-radius:2px;"></div>`;
+  }
+
+  // Sagari (decorative strings, 関取+)
+  if(d.rank>=4&&!sm){
+    const sagCount=7;
+    for(let i=0;i<sagCount;i++){
+      const sx=mawX+s(4)+Math.round(i*((mawW-s(8))/(sagCount-1)));
+      h+=`<div style="position:absolute;left:${sx}px;top:${mawY+mawH}px;width:${s(2)}px;height:${s(12)}px;background:${mawColor};opacity:.75;border-radius:0 0 1px 1px;"></div>`;
+    }
+  }
+
+  // Tsuna (横綱 rope + gohei)
+  if(hasTsuna&&!sm){
+    const tY=mawY-s(7);
+    h+=`<div style="position:absolute;left:${mawX-s(4)}px;top:${tY}px;width:${mawW+s(8)}px;height:${s(6)}px;background:#F0EED0;border-radius:${s(3)}px;box-shadow:0 1px 0 #d0c890;"></div>`;
+    // Gohei (zigzag paper strips)
+    for(let i=0;i<4;i++){
+      const gx=mawX+s(6)+Math.round(i*((mawW-s(12))/3));
+      h+=`<div style="position:absolute;left:${gx}px;top:${mawY+mawH}px;width:${s(5)}px;height:${s(15)}px;background:#F0EED0;opacity:.9;clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%);"></div>`;
+    }
+  }
+
+  // ── Legs (thighs + calves) ──
+  h+=`<div style="position:absolute;left:${CX-thW-legGap}px;top:${legY}px;width:${thW}px;height:${thH}px;background:${skin};border-radius:${s(3)}px 0 0 0;"></div>`;
+  h+=`<div style="position:absolute;left:${CX+legGap}px;top:${legY}px;width:${thW}px;height:${thH}px;background:${skin};border-radius:0 ${s(3)}px 0 0;"></div>`;
+  // Calves (slightly narrower)
+  h+=`<div style="position:absolute;left:${CX-thW-legGap+s(2)}px;top:${legY+thH}px;width:${thW-s(4)}px;height:${caH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
+  h+=`<div style="position:absolute;left:${CX+legGap+s(2)}px;top:${legY+thH}px;width:${thW-s(4)}px;height:${caH}px;background:${skin};border-radius:0 0 ${s(4)}px ${s(4)}px;"></div>`;
+
+  h+='</div>';
+  return h;
 }
-function clearMsg(id){const b=document.getElementById(id||curMsgBox);if(b)b.innerHTML='';}
 
 // ================================================================
-//  SCREEN
+//  SCREENS
 // ================================================================
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+  if(id==='facility') renderFacilityTab();
+  if(id==='disciples') renderDisciplesTab();
+}
+
+// ================================================================
+//  MESSAGES
+// ================================================================
+let curMsg='msg-main';
+function addMsg(txt,cls=''){
+  const b=document.getElementById(curMsg);
+  if(!b)return;
+  const br=document.createElement('br');
+  const sp=document.createElement('span');
+  sp.className=cls||'mg';
+  sp.textContent=txt;
+  b.appendChild(br);b.appendChild(sp);
+  b.scrollTop=b.scrollHeight;
+}
+function clearMsg(id){const b=document.getElementById(id||curMsg);if(b)b.innerHTML='';}
+
 // ================================================================
 //  MODAL
 // ================================================================
-let modalCallback=null;
-function showModal(emoji,title,text,type,cb){
-  document.getElementById('modal-emoji').textContent=emoji;
+let modalQ=[];
+function showModal(em,title,text,type,choices){
+  document.getElementById('modal-em').textContent=em;
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-title').style.color=
-    type==='good'?'#6dff8d':type==='bad'?'#ff7070':'#f0c060';
+    type==='good'?'#6dff8d':type==='bad'?'#ff7070':type==='choice'?'#9ac8ff':'#f0c060';
   document.getElementById('modal-text').textContent=text;
-  document.getElementById('modal').classList.add('active');
-  modalCallback=cb||null;
+  const cc=document.getElementById('modal-choices');
+  cc.innerHTML='';
+  if(choices&&choices.length){
+    choices.forEach(ch=>{
+      const b=document.createElement('button');
+      b.className='btn btn-sm '+(ch.cls||'');
+      b.textContent=ch.label;
+      b.addEventListener('click',()=>{
+        document.getElementById('modal').classList.remove('on');
+        const handler=ch.fn||ch.cb;
+        if(handler) handler();
+        processModalQueue();
+      });
+      cc.appendChild(b);
+    });
+  } else {
+    const b=document.createElement('button');
+    b.className='btn btn-gold btn-sm';
+    b.textContent='▶ OK';
+    b.addEventListener('click',()=>{
+      document.getElementById('modal').classList.remove('on');
+      processModalQueue();
+    });
+    cc.appendChild(b);
+  }
+  document.getElementById('modal').classList.add('on');
 }
-document.getElementById('btn-modal-ok').addEventListener('click',()=>{
-  document.getElementById('modal').classList.remove('active');
-  updateStatBars();
-  if(modalCallback){modalCallback();modalCallback=null;}
-});
+function queueModal(em,title,text,type,choices){
+  // Accept both positional args and single-object form
+  if(em&&typeof em==='object'&&!Array.isArray(em)){
+    const o=em;
+    modalQ.push({em:o.em,title:o.title,text:o.text,type:o.type||'',choices:o.choices});
+  } else {
+    modalQ.push({em,title,text,type,choices});
+  }
+}
+function processModalQueue(){
+  if(modalQ.length>0){
+    const m=modalQ.shift();
+    setTimeout(()=>showModal(m.em,m.title,m.text,m.type,m.choices),200);
+  }
+}
 
 // ================================================================
-//  UI HELPERS
+//  RENAME MODAL
 // ================================================================
-function updateStatBars(){
-  const w=gs.w;
-  const hpPct=(w.hp/w.maxHp)*100;
-  const hpBar=document.getElementById('bar-hp');
-  hpBar.style.width=hpPct+'%';
-  hpBar.className='sbar-fill sbar-fill-hp'+(hpPct<30?' low':hpPct<60?' mid':'');
-  document.getElementById('val-hp').textContent=w.hp;
+function showRenameModal(){
+  if(!GS||GS.phase!=='training') return;
+  const d=GS.disciples[GS.focusIdx];
+  if(!d||d.retired) return;
 
-  document.getElementById('bar-mot').style.width=w.mot+'%';
-  document.getElementById('val-mot').textContent=w.mot;
+  const histLine=(d.nameHistory&&d.nameHistory.length>1)
+    ?`<div style="font-size:9px;color:var(--gray);margin-bottom:10px;">改名歴：${d.nameHistory.join('→')}</div>`:'';
 
-  ['str','end','tec','men'].forEach(s=>{
-    document.getElementById('bar-'+s).style.width=w[s]+'%';
-    document.getElementById('val-'+s).textContent=w[s];
+  document.getElementById('modal-em').textContent='✎';
+  document.getElementById('modal-title').textContent='しこ名の変更';
+  document.getElementById('modal-title').style.color='var(--gold3)';
+  document.getElementById('modal-text').innerHTML=
+    `<span style="font-size:11px;">現在：<strong>${d.name}</strong></span><br><br>`+
+    `${histLine}`+
+    `<input id="rename-input" class="rename-input" type="text" maxlength="10" value="${d.name}">`;
+  const cc=document.getElementById('modal-choices');
+  cc.innerHTML='';
+  const ok=document.createElement('button');
+  ok.className='btn btn-gold btn-sm';ok.textContent='改名する';
+  ok.addEventListener('click',()=>doRename());
+  const cancel=document.createElement('button');
+  cancel.className='btn btn-sm';cancel.textContent='やめる';
+  cancel.addEventListener('click',()=>{
+    document.getElementById('modal').classList.remove('on');
+    processModalQueue();
   });
+  cc.appendChild(ok);cc.appendChild(cancel);
+  document.getElementById('modal').classList.add('on');
+  setTimeout(()=>{
+    const inp=document.getElementById('rename-input');
+    if(inp){inp.focus();inp.select();}
+  },120);
+}
+
+function doRename(){
+  const d=GS.disciples[GS.focusIdx];
+  if(!d) return;
+  const inp=document.getElementById('rename-input');
+  if(!inp) return;
+  const newName=inp.value.trim().replace(/\s+/g,'');
+  if(!newName){addMsg('しこ名を入力してください。','mgb');return;}
+  if(newName===d.name){
+    document.getElementById('modal').classList.remove('on');
+    return;
+  }
+  const oldName=d.name;
+  if(!d.nameHistory) d.nameHistory=[oldName];
+  d.nameHistory.push(newName);
+  d.name=newName;
+  document.getElementById('modal').classList.remove('on');
+  addMsg(`✎ ${oldName} → ${newName} に改名しました。`,'mge');
+  saveGame();
+  refreshTrainTab();
+  renderDiscSel();
+  updateMainHeader();
+  buildDiscTabs();
+}
+
+// ================================================================
+//  CREATE SCREEN
+// ================================================================
+let selSkin='fair', selFace='round', selBody='normal', selPers='earnest';
+
+function buildSel(containerId, items, getCur, setCur){
+  const c=document.getElementById(containerId);
+  c.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button');
+    b.className='sbtn'+(getCur()===it.id?' on':'');
+    b.innerHTML=`<span class="se">${it.emoji||it.em||'●'}</span><span class="sn">${it.name}</span><span class="sd">${(it.desc||'').replace(/\n/,'<br>')}</span>`;
+    b.innerHTML=`<span class="se">${it.emoji||it.em||'●'}</span><span class="sn">${it.name}</span>`;
+    if(it.desc||it.descs) b.innerHTML+=`<span class="sd">${((it.desc||'')).split('\n').join(' ')}</span>`;
+    b.addEventListener('click',()=>{setCur(it.id);buildSel(containerId,items,getCur,setCur);updatePreview();});
+    c.appendChild(b);
+  });
+}
+
+function updatePreview(){
+  const bt=BODIES.find(b=>b.id===selBody)||BODIES[0];
+  const p=PERS.find(p=>p.id===selPers)||PERS[0];
+  const s=bt.stats;
+  document.getElementById('create-preview').innerHTML=
+    `<span style="color:var(--gold3)">▶ 初期ステータス</span><br>`+
+    `筋力:${s.str} 体力:${s.end} 技術:${s.tec} 精神:${s.men}<br>`+
+    `体重:${s.weight}kg ／ 最大HP:${s.hp}<br>`+
+    `<span style="color:var(--gray)">性格：${p.name} ─ ${(p.desc||'').split('\n')[0]}</span>`;
+}
+
+function initCreateScreen(){
+  selSkin='fair';selFace='round';selBody='normal';selPers='earnest';
+  buildSel('sel-skin',SKINS,()=>selSkin,v=>{selSkin=v;});
+  buildSel('sel-face',FACES,()=>selFace,v=>{selFace=v;});
+  buildSel('sel-body',BODIES,()=>selBody,v=>{selBody=v;});
+  buildSel('sel-pers',PERS,()=>selPers,v=>{selPers=v;});
+  updatePreview();
+  document.getElementById('inp-name').value='';
+  showScreen('scr-create');
+}
+
+// ================================================================
+//  MAIN SCREEN
+// ================================================================
+function initMainScreen(){
+  curMsg='msg-main';
+  clearMsg('msg-main');
+  document.getElementById('train-area').style.display='block';
+  document.getElementById('btn-to-basho').style.display='none';
+  updateMainHeader();
+  renderCharArea();
+  renderDiscSel();
+  renderCmdGrid();
+  addMsg(`【第${GS.basho+1}場所前稽古】`,'mge');
+  addMsg(`稽古メニューから${GS.actLeft}回鍛えよう！`,'mg');
+  showScreen('scr-main');
+  switchTab('train');
+
+  // Post-results events
+  checkPostBashoEvents();
 }
 
 function updateMainHeader(){
-  const w=gs.w;
-  document.getElementById('h-name').textContent=w.name;
-  document.getElementById('h-rank').textContent=rankName();
-  document.getElementById('h-basho').textContent=`第${gs.basho+1}場所前`;
-  document.getElementById('h-turn').textContent=`稽古 ${gs.trainTurn+1}/${gs.maxTrainTurns}`;
-  document.getElementById('h-age').textContent=`${w.age}歳`;
-  document.getElementById('p-name').textContent=w.name;
-  document.getElementById('p-detail').textContent=`体重: ${w.weight}kg | ${w.age}歳`;
-  document.getElementById('turns-left').textContent=gs.maxTrainTurns-gs.trainTurn;
-  updateStatBars();
+  const d=GS.disciples[GS.focusIdx];
+  if(!d) return;
+  document.getElementById('h-name').textContent=d.name;
+  document.getElementById('h-rank').textContent=rankDisplay(d)+(d.rank>=4?'(関取)':'');
+  document.getElementById('h-basho').textContent=`第${GS.basho+1}場所前`;
+  document.getElementById('h-actions').textContent=`稽古 残${GS.actLeft}回`;
+  document.getElementById('h-money').textContent=`${GS.money}両`;
 }
 
-function buildCmdGrid(){
-  const grid=document.getElementById('cmd-grid');
-  grid.innerHTML='';
-  const w=gs.w;
-  CMDS.forEach(cmd=>{
-    const btn=document.createElement('button');
-    btn.className='cmd-btn '+cmd.cls;
-    const canDo=cmd.hpCost<=0||w.hp>=cmd.hpCost;
-    if(!canDo)btn.disabled=true;
-    btn.innerHTML=`<span class="cn">${cmd.emoji} ${cmd.name}</span>`+
-      `<span class="ce">${cmd.eff}</span>`+
-      `<span class="cc">${cmd.cost}</span>`;
-    btn.addEventListener('click',()=>doTrain(cmd.id));
-    grid.appendChild(btn);
+function renderCharArea(){
+  const d=GS.disciples[GS.focusIdx];
+  if(!d){document.getElementById('char-area').innerHTML='';return;}
+  document.getElementById('char-area').innerHTML=renderChar(d,'lg');
+}
+
+function renderDiscSel(){
+  const sel=document.getElementById('disc-sel');
+  sel.innerHTML='';
+  GS.disciples.forEach((d,i)=>{
+    const chip=document.createElement('div');
+    chip.className='disc-chip'+(i===GS.focusIdx?' active':'');
+    chip.textContent=`${d.name}(${rankDisplay(d)})`;
+    if(d.injury&&d.injury.remaining>0) chip.textContent+='🩹';
+    chip.addEventListener('click',()=>{GS.focusIdx=i;refreshTrainTab();});
+    sel.appendChild(chip);
   });
 }
 
+function refreshTrainTab(){
+  const d=GS.disciples[GS.focusIdx];
+  if(!d) return;
+  updateMainHeader();
+  renderCharArea();
+  renderDiscSel();
+  renderCmdGrid();
+  renderStatBars(d);
+}
+
+function renderStatBars(d){
+  if(!d) return;
+  const maxS=999;
+  const hpPct=(d.hp/d.maxHp)*100;
+  const hpBar=document.getElementById('bar-hp');
+  hpBar.style.width=hpPct+'%';
+  hpBar.className='sbar-f fc-hp'+(hpPct<30?' low':hpPct<55?' mid':'');
+  document.getElementById('val-hp').textContent=d.hp;
+  document.getElementById('bar-mot').style.width=d.mot+'%';
+  document.getElementById('val-mot').textContent=d.mot;
+  ['str','end','tec','men'].forEach(s=>{
+    document.getElementById(`bar-${s}`).style.width=((d[s]/maxS)*100)+'%';
+    document.getElementById(`val-${s}`).textContent=d[s];
+  });
+  document.getElementById('tr-name-disp').textContent=d.name+(d.injury&&d.injury.remaining>0?` 🩹怪我(${d.injury.remaining})`:'');
+  document.getElementById('tr-age-weight').textContent=`${d.age}歳 ${d.weight}kg`;
+  const histEl=document.getElementById('tr-name-hist');
+  if(histEl){
+    const h=d.nameHistory;
+    histEl.textContent=(h&&h.length>1)?'改名歴：'+h.join('→'):'';
+  }
+}
+
+function renderCmdGrid(){
+  const grid=document.getElementById('cmd-grid');
+  grid.innerHTML='';
+  const d=GS.disciples[GS.focusIdx];
+  if(!d) return;
+  CMDS.forEach(cmd=>{
+    const b=document.createElement('button');
+    b.className='cbtn '+cmd.cls;
+    const canDo=cmd.hp<=0||d.hp>=cmd.hp;
+    if(!canDo) b.disabled=true;
+    b.innerHTML=`<span class="cn">${cmd.em} ${cmd.name}</span><span class="ce">${cmd.eff}</span><span class="cc">${cmd.cost}</span>`;
+    b.addEventListener('click',()=>doTrain(cmd.id));
+    grid.appendChild(b);
+  });
+  document.getElementById('act-left').textContent=GS.actLeft;
+}
+
 // ================================================================
-//  TRAINING
+//  TRAINING LOGIC
 // ================================================================
 function doTrain(cmdId){
-  if(gs.phase!=='training')return;
+  if(GS.phase!=='training') return;
   const cmd=CMDS.find(c=>c.id===cmdId);
-  const w=gs.w;
-  const p=PERSONALITIES.find(p=>p.id===w.pers);
+  const d=GS.disciples[GS.focusIdx];
+  if(!d||d.retired) return;
+  if(cmd.hp>0&&d.hp<cmd.hp){addMsg('体力が足りない！休養してください。','mgb');return;}
 
-  if(cmd.hpCost>0&&w.hp<cmd.hpCost){
-    addMsg('体力が足りない！休養してください。','bad');
-    return;
-  }
-
-  // HP change
-  w.hp=Math.max(0,Math.min(w.maxHp, w.hp-cmd.hpCost));
+  // Apply HP
+  const bathLv=GS.facilities.bath||1;
+  const hpMod=cmd.hp<0?Math.round(cmd.hp*(1+(bathLv-1)*0.2)):cmd.hp;
+  d.hp=clamp(d.hp-hpMod,0,d.maxHp);
 
   if(cmdId==='rest'){
     clearMsg('msg-main');
-    addMsg('💤 しっかり休養した。体力を回復した！','good');
+    addMsg(`${d.name}: 💤 休養した。体力回復！`,'mgg');
+    d.injury&&d.injury.remaining>0&&(d.injury.remaining-=Math.max(1,GS.facilities.medical-1));
+    if(d.injury&&d.injury.remaining<=0) d.injury=null;
+    d.overTrain=Math.max(0,d.overTrain-2);
   } else {
-    // Calculate gains
+    // Facility bonus
+    const dojoLv=GS.facilities.dojo||1;
+    const facBonus=1+(dojoLv-1)*0.13;
+    const chankoBonus=cmdId==='chanko'?1+(( GS.facilities.chanko||1)-1)*0.18:1;
+    const p=getP(d);
+    const isInjured=d.injury&&d.injury.remaining>0;
+    const injuryMod=isInjured?(d.injury.severity==='heavy'?0.4:0.7):1;
+
+    // Overtraining check
+    d.overTrain=(d.overTrain||0)+1;
+    const overMod=d.overTrain>=6?0.6:d.overTrain>=4?0.8:1;
+
     const gains={str:0,end:0,tec:0,men:0};
     ['str','end','tec','men'].forEach(s=>{
-      let g=rnd(cmd.g[s][0],cmd.g[s][1]);
-      // Personality effects
-      if(p.special==='earnest') g=Math.ceil(g*1.2);
+      const base=cmd.g[s];
+      let g=rnd(base[0],base[1]);
+
+      // Stat-specific personality bonus
+      if(p.special==='earnest') g=Math.ceil(g*1.25);
       if(p.special==='genius'){
         const roll=Math.random();
-        if(roll<0.15) g=Math.ceil(g*2.5);      // 大成長
-        else if(roll<0.3) g=Math.floor(g*0.3);  // スランプ
+        if(roll<0.12) g=Math.ceil(g*2.8);
+        else if(roll<0.28) g=Math.max(0,Math.floor(g*0.2));
       }
-      if(p.special==='quick'&&s==='tec') g=Math.ceil(g*1.5);
-      if(p.special==='mental'&&s==='men') g=Math.ceil(g*1.4);
-      // Motivation bonus
-      if(w.mot>=80) g=Math.ceil(g*1.1);
-      else if(w.mot<40) g=Math.floor(g*0.8);
+      if(p.special==='quick'&&s==='tec') g=Math.ceil(g*1.6);
+      if(p.special==='mental'&&s==='men') g=Math.ceil(g*1.5);
+
+      // Motivation modifier
+      const motMod=d.mot>=80?1.12:d.mot<40?0.78:1;
+      g=Math.round(g*motMod*facBonus*chankoBonus*injuryMod*overMod);
+
+      // Slump: 5% chance of -1~3 decrease
+      if(Math.random()<0.05) g=-rnd(1,3);
+
+      // Diminishing returns near cap
+      const cap=d[s+'Cap']||999;
+      const ratio=d[s]/cap;
+      if(ratio>0.8) g=Math.round(g*(1-ratio)*5);
 
       gains[s]=g;
-      w[s]=cap(w[s]+g);
+      d[s]=gc(d[s]+g,cap);
     });
 
-    // Degeiko: motivation bonus
-    if(cmdId==='degeiko') w.mot=cap2(w.mot+10);
+    // Weight change for chanko
+    if(cmdId==='chanko'){
+      const cLv=GS.facilities.chanko||1;
+      d.weight=Math.min(220,d.weight+Math.round(rnd(1,3)*(1+(cLv-1)*0.2)));
+    }
+
+    // Degeiko: motivation boost
+    if(cmdId==='degeiko') d.mot=cl2(d.mot+12);
 
     clearMsg('msg-main');
     const SN={str:'筋力',end:'体力',tec:'技術',men:'精神'};
-    const parts=Object.entries(gains).filter(([,v])=>v>0).map(([k,v])=>`${SN[k]}+${v}`);
-    addMsg(`【${cmd.name}】${parts.length?parts.join(' / '):'変化なし'}`,
-      parts.length?'good':'gray');
-    if(cmdId==='degeiko') addMsg('やる気+10！','good');
+    const parts=Object.entries(gains).filter(([,v])=>v!==0)
+      .map(([k,v])=>v>0?`${SN[k]}+${v}`:`${SN[k]}${v}`);
+    addMsg(`${d.name}:【${cmd.name}】${parts.join(' / ')||'変化なし'}`,
+      parts.some(p=>p.includes('+'))?'mgg':'mgx');
+    if(overMod<1) addMsg('過剰な稽古で効果が下がっている...','mgb');
+    if(isInjured) addMsg(`怪我中のため効果が下がっている(残${d.injury.remaining}ターン)`,'mgb');
   }
-
-  gs.trainTurn++;
 
   // Motivation decay
-  if(cmdId!=='rest') w.mot=Math.max(10,w.mot-3);
+  if(cmdId!=='rest') d.mot=Math.max(10,d.mot-4);
 
-  // Random event (25% per non-rest training)
-  if(cmdId!=='rest'&&Math.random()<0.25){
+  // Random event (22% chance, not on rest)
+  if(cmdId!=='rest'&&Math.random()<0.22){
     const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
-    ev.fn(w);
-    setTimeout(()=>showModal(ev.emoji,ev.title,ev.text,ev.type),300);
-    addMsg(`[イベント] ${ev.title}`,'event');
+    ev.fn(d);
+    queueModal(ev.em,ev.t,ev.txt,ev.type);
+    addMsg(`[イベント] ${ev.t}`,'mge');
+    setTimeout(processModalQueue,400);
   }
 
-  // Check end of training
-  if(gs.trainTurn>=gs.maxTrainTurns){
-    document.getElementById('training-area').style.display='none';
-    document.getElementById('btn-goto-basho').style.display='block';
-    addMsg('━━━━━━━━━━','gray');
-    addMsg('稽古終了！場所に出る準備ができた！','event');
+  GS.actLeft--;
+
+  // Passive training for other disciples
+  GS.disciples.forEach((dd,i)=>{
+    if(i!==GS.focusIdx&&!dd.retired&&cmdId!=='rest'){
+      dd.str=gc(dd.str+rnd(0,1),dd.strCap);
+      dd.end=gc(dd.end+rnd(0,1),dd.endCap);
+      dd.tec=gc(dd.tec+rnd(0,1),dd.tecCap);
+      dd.men=gc(dd.men+rnd(0,1),dd.menCap);
+    }
+  });
+
+  // End of training phase
+  if(GS.actLeft<=0){
+    document.getElementById('train-area').style.display='none';
+    document.getElementById('btn-to-basho').style.display='block';
+    addMsg('━━━━━━━━━━','mgx');
+    addMsg('稽古終了！場所に出る準備ができた！','mge');
   }
 
-  updateMainHeader();
-  buildCmdGrid();
-  save();
+  refreshTrainTab();
+  saveGame();
+}
+
+// ================================================================
+//  POST-BASHO EVENTS
+// ================================================================
+function checkPostBashoEvents(){
+  if(GS.basho===0) return;
+
+  // Scout event
+  if(GS.basho>=GS.nextScout&&GS.disciples.length<3){
+    const scEv=SCOUT_EVENTS[rnd(0,SCOUT_EVENTS.length-1)];
+    const scLv=GS.facilities.scout||1;
+    // Generate candidate
+    const bTypes=['normal','heavy','muscle','light'];
+    const pTypes=['earnest','genius','mental','quick'];
+    const skinTypes=['fair','wheat','tan','dark'];
+    const faceTypes=['round','long','square','baby'];
+    const cBody=bTypes[rnd(0,bTypes.length-1)];
+    const cPers=pTypes[rnd(0,pTypes.length-1)];
+    const cSkin=skinTypes[rnd(0,skinTypes.length-1)];
+    const cFace=faceTypes[rnd(0,faceTypes.length-1)];
+    const cName=OPP_PRE[rnd(0,OPP_PRE.length-1)]+OPP_SUF[rnd(0,OPP_SUF.length-1)];
+    const cBt=BODIES.find(b=>b.id===cBody);
+    const capBonus=scLv>=3?100:scLv>=2?50:0;
+
+    const txt=`${scEv.txt}\n\n名前案：${cName}\n体格：${cBt.name}\n\n受け入れますか？`;
+    setTimeout(()=>showModal(scEv.em,scEv.t,txt,'choice',[
+      {label:'▶ 入門を許可する！',cls:'btn-gold',fn:()=>{
+        const nd=newDisciple(cName,cSkin,cFace,cBody,cPers,true);
+        nd.strCap+=capBonus; nd.endCap+=capBonus; nd.tecCap+=capBonus; nd.menCap+=capBonus;
+        GS.disciples.push(nd);
+        GS.nextScout=GS.basho+rnd(5,9);
+        addMsg(`${nd.name}が入門した！`,'mge');
+        renderDiscSel();
+        renderDisciplesTab();
+        saveGame();
+      }},
+      {label:'✗ お断りする',cls:'btn-red',fn:()=>{GS.nextScout=GS.basho+rnd(3,6);saveGame();}},
+    ]),400);
+    return;
+  }
+
+  // Sponsor event
+  if(GS.basho>=GS.nextSponsor&&GS.sponsors.length<2){
+    const spEv=SPONSOR_EVENTS[rnd(0,SPONSOR_EVENTS.length-1)];
+    if(!GS.sponsors.find(s=>s.name===spEv.name)){
+      setTimeout(()=>showModal(spEv.em,`スポンサー依頼：${spEv.name}`,spEv.txt,'choice',[
+        {label:'▶ 受諾する',cls:'btn-gold',fn:()=>{
+          GS.sponsors.push({name:spEv.name,amount:spEv.amount});
+          GS.nextSponsor=GS.basho+rnd(8,14);
+          addMsg(`${spEv.name}のスポンサーが決まった！毎場所後+${spEv.amount}両`,'mge');
+          saveGame();
+        }},
+        {label:'✗ 断る',cls:'btn-red',fn:()=>{GS.nextSponsor=GS.basho+rnd(4,8);saveGame();}},
+      ]),600);
+    }
+  }
+}
+
+// ================================================================
+//  FACILITY TAB
+// ================================================================
+function renderFacilityTab(){
+  const list=document.getElementById('fac-list');
+  list.innerHTML='';
+  document.getElementById('fac-money').textContent=GS.money;
+
+  FACILITIES.forEach(fac=>{
+    const lv=GS.facilities[fac.id]||1;
+    const maxLv=3;
+    const isMax=lv>=maxLv;
+    const cost=isMax?0:fac.costs[lv-1];
+
+    const div=document.createElement('div');
+    div.className='fac-item';
+    const stars=Array.from({length:maxLv},(_,i)=>`<div class="fac-star${i<lv?' on':''}"></div>`).join('');
+    div.innerHTML=`
+      <div class="fac-info">
+        <div class="fac-name">${fac.em} ${fac.name}</div>
+        <div class="fac-desc">${isMax?'最大レベル到達！':fac.descs[lv-1]}${isMax?'':' → '+fac.descs[lv]}</div>
+        <div class="fac-lv">${stars}<span style="font-size:9px;color:var(--gray);margin-left:4px;">Lv${lv}</span></div>
+      </div>
+      <button class="fac-btn" ${isMax||GS.money<cost?'disabled':''} data-fac="${fac.id}">
+        ${isMax?'MAX':cost+'両'}
+      </button>
+    `;
+    div.querySelector('.fac-btn').addEventListener('click',()=>{
+      if(GS.money>=cost&&!isMax){
+        GS.money-=cost;
+        GS.facilities[fac.id]=(GS.facilities[fac.id]||1)+1;
+        addMsg(`${fac.name}をLv${GS.facilities[fac.id]}に強化した！`,'mge');
+        renderFacilityTab();
+        updateMainHeader();
+        saveGame();
+      }
+    });
+    list.appendChild(div);
+  });
+
+  // Sponsors list
+  if(GS.sponsors.length>0){
+    const sdiv=document.createElement('div');
+    sdiv.className='pbox';
+    sdiv.innerHTML=`<div class="sec-title">▶ スポンサー</div>`+
+      GS.sponsors.map(s=>`<div style="font-size:11px;padding:3px 0;border-bottom:1px solid #222;">${s.name}: 毎場所+${s.amount}両</div>`).join('');
+    list.appendChild(sdiv);
+  }
+}
+
+// ================================================================
+//  DISCIPLES TAB
+// ================================================================
+function renderDisciplesTab(){
+  const list=document.getElementById('disc-list');
+  list.innerHTML='';
+  GS.disciples.forEach((d,i)=>{
+    const div=document.createElement('div');
+    div.className='disc-card slide-up';
+    div.innerHTML=`
+      <div class="dc-char">${renderChar(d,'sm')}</div>
+      <div class="dc-info">
+        <div class="dc-name">${d.name}${d.injury&&d.injury.remaining>0?'<span class="injury-badge">怪我中</span>':''}</div>
+        <div class="dc-rank">${rankDisplay(d)}${d.rank>=4?' 〔関取〕':''} / ${d.age}歳 ${d.weight}kg</div>
+        ${d.nameHistory&&d.nameHistory.length>1?`<div class="name-hist">改名歴：${d.nameHistory.join('→')}</div>`:''}
+        <div class="dc-stats">
+          筋:${d.str} 体:${d.end} 技:${d.tec} 精:${d.men}<br>
+          HP:${d.hp}/${d.maxHp} やる気:${d.mot}<br>
+          通算:${d.wins}勝${d.losses}敗
+        </div>
+      </div>
+    `;
+    div.addEventListener('click',()=>{
+      GS.focusIdx=i;
+      switchTab('train');
+      refreshTrainTab();
+    });
+    list.appendChild(div);
+  });
 }
 
 // ================================================================
 //  TOURNAMENT SETUP
 // ================================================================
-function genOpp(rankId){
-  const base=15+rankId*9;
-  const v=12;
+function genOpp(rankId, pos){
+  const r=RANKS[rankId];
+  // Stat base scales with rank and position
+  const base=30+rankId*55-(pos/(r.maxPos||1))*20;
+  const v=20;
   return {
-    name:oppName(),
-    rankId:rankId,
-    str:cap(base+rnd(-v,v)),
-    end:cap(base+rnd(-v,v)),
-    tec:cap(base+rnd(-v,v)),
-    men:cap(base+rnd(-v,v)),
+    name:OPP_PRE[rnd(0,OPP_PRE.length-1)]+OPP_SUF[rnd(0,OPP_SUF.length-1)],
+    rankId, pos,
+    str:clamp(Math.round(base+rnd(-v,v)),10,900),
+    end:clamp(Math.round(base+rnd(-v,v)),10,900),
+    tec:clamp(Math.round(base+rnd(-v,v)),10,900),
+    men:clamp(Math.round(base+rnd(-v,v)),10,900),
   };
 }
 
 function startBasho(){
-  const w=gs.w;
-  const r=RANKS[w.rank];
-  const mc=r.matches;
-  const opps=[];
-  for(let i=0;i<mc;i++) opps.push(genOpp(w.rank));
+  const tourDiscs=GS.disciples.filter(d=>!d.retired);
 
-  gs.statsSnap={str:w.str,end:w.end,tec:w.tec,men:w.men};
-  gs.tour={
-    day:0, mc, opps,
-    results:[], wins:0, loss:0,
-  };
-  gs.phase='tournament';
-  save();
+  // Build tournament for each disciple
+  const tourMap={};
+  tourDiscs.forEach(d=>{
+    const r=RANKS[d.rank];
+    const mc=r.matches;
+    const opps=[];
+    for(let i=0;i<mc;i++) opps.push(genOpp(d.rank,d.pos+rnd(-3,3)));
+    d.statsSnap={str:d.str,end:d.end,tec:d.tec,men:d.men};
+    tourMap[d.id]={day:0,mc,opps,results:[],wins:0,loss:0};
+  });
+
+  GS.tour={discs:tourMap, viewIdx:0};
+  GS.phase='tournament';
+  saveGame();
   showBashoScreen();
 }
 
+// ================================================================
+//  BASHO SCREEN
+// ================================================================
+let bashoViewDiscIdx=0;
+
 function showBashoScreen(){
-  const w=gs.w;
-  const t=gs.tour;
-  const r=RANKS[w.rank];
-
-  document.getElementById('t-name').textContent=w.name;
-  document.getElementById('t-rank').textContent=rankName();
-  document.getElementById('t-basho-title').textContent=`第${gs.basho+1}場所`;
-  curMsgBox='msg-t';
-  clearMsg('msg-t');
-
-  // Build record grid
-  const grid=document.getElementById('record-grid');
-  grid.className='record-grid '+(t.mc===15?'record-grid-15':'record-grid-7');
-
-  showScreen('tournament-screen');
+  bashoViewDiscIdx=0;
+  curMsg='msg-basho';
+  clearMsg('msg-basho');
+  buildDiscTabs();
   refreshBashoUI();
+  showScreen('scr-basho');
+  addMsg(`第${GS.basho+1}場所が始まった！`,'mge');
+}
 
-  addMsg(`第${gs.basho+1}場所が始まった！`,'event');
-  addMsg(`${t.mc}番勝負。${r.upWins}勝以上で勝ち越し！`,'normal');
+function buildDiscTabs(){
+  const area=document.getElementById('t-disc-tabs');
+  area.innerHTML='';
+  const tourDiscs=GS.disciples.filter(d=>!d.retired);
+  if(tourDiscs.length<=1){area.style.display='none';return;}
+  area.style.display='flex';
+  tourDiscs.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='dt-btn'+(i===bashoViewDiscIdx?' on':'');
+    b.textContent=d.name;
+    b.addEventListener('click',()=>{bashoViewDiscIdx=i;clearMsg('msg-basho');refreshBashoUI();});
+    area.appendChild(b);
+  });
+}
+
+function getCurBashoDisc(){
+  const tourDiscs=GS.disciples.filter(d=>!d.retired);
+  return tourDiscs[bashoViewDiscIdx]||tourDiscs[0];
 }
 
 function refreshBashoUI(){
-  const w=gs.w;
-  const t=gs.tour;
-  const done=t.day>=t.mc;
+  const d=getCurBashoDisc();
+  if(!d) return;
+  const t=GS.tour.discs[d.id];
+  if(!t) return;
 
-  document.getElementById('t-record').textContent=`${t.wins}勝${t.loss}敗`;
-  document.getElementById('t-day-label').textContent=done?'終了':`${t.day+1}日目`;
-  document.getElementById('t-remaining').textContent=done?'全取組完了':`残り${t.mc-t.day}日`;
+  const r=RANKS[d.rank];
+  document.getElementById('t-name').textContent=d.name;
+  document.getElementById('t-rank').textContent=rankDisplay(d);
+  document.getElementById('t-rec').textContent=`${t.wins}勝${t.loss}敗`;
+  document.getElementById('t-basho-title').textContent=`第${GS.basho+1}場所`;
+
+  const done=t.day>=t.mc;
+  document.getElementById('t-day').textContent=done?'終了':`${t.day+1}日目`;
+  document.getElementById('t-remain').textContent=done?'全取組完了':`残り${t.mc-t.day}日`;
 
   // Record grid
-  const grid=document.getElementById('record-grid');
+  const grid=document.getElementById('t-rgrid');
+  grid.className='rgrid '+(t.mc===15?'rg15':'rg7');
   grid.innerHTML='';
   for(let i=0;i<t.mc;i++){
     const c=document.createElement('div');
     c.className='rc';
     if(i<t.results.length){
-      c.className+=(t.results[i]==='win')?' rc-win':' rc-lose';
+      c.className+=(t.results[i]==='win')?' rcw':' rcl';
       c.textContent=(t.results[i]==='win')?'○':'●';
     } else {
-      c.className+=' rc-empty';
-      c.textContent='－';
+      c.className+=' rce';c.textContent='－';
     }
     grid.appendChild(c);
   }
 
   if(!done){
     const opp=t.opps[t.day];
-    document.getElementById('t-my-name').textContent=w.name;
-    document.getElementById('t-my-rank').textContent=rankName();
-    document.getElementById('t-opp-name').textContent=opp.name;
+    document.getElementById('t-my').textContent=d.name;
+    document.getElementById('t-my-rank').textContent=rankDisplay(d);
+    document.getElementById('t-opp').textContent=opp.name;
     document.getElementById('t-opp-rank').textContent=RANKS[opp.rankId].name;
-    const wp=winProb(w,opp);
-    document.getElementById('t-win-prob').textContent=`予想勝率: ${Math.round(wp*100)}%`;
-
+    const wp=winProb(d,opp);
+    document.getElementById('t-prob').textContent=`予想勝率: ${Math.round(wp*100)}%`;
     document.getElementById('match-pre').style.display='block';
-    document.getElementById('match-result').style.display='none';
+    document.getElementById('match-res').style.display='none';
     document.getElementById('btn-fight').style.display='block';
     document.getElementById('btn-auto').style.display='block';
-    document.getElementById('btn-end-basho').style.display='none';
+    document.getElementById('btn-basho-end').style.display='none';
   } else {
     document.getElementById('match-pre').style.display='none';
-    document.getElementById('match-result').style.display='none';
+    document.getElementById('match-res').style.display='none';
     document.getElementById('btn-fight').style.display='none';
     document.getElementById('btn-auto').style.display='none';
-    document.getElementById('btn-end-basho').style.display='block';
+    document.getElementById('btn-basho-end').style.display='block';
 
-    const kachi=t.wins>t.loss;
-    addMsg('━━━━━━━━━━','gray');
-    addMsg(`場所終了！ ${t.wins}勝${t.loss}敗`,kachi?'good':'bad');
-    addMsg(kachi?'勝ち越し！番付が上がるかも！':'負け越し...番付が下がるかも...',kachi?'good':'bad');
+    // Check all discs done
+    const allDone=GS.disciples.filter(d=>!d.retired).every(dd=>{
+      const tt=GS.tour.discs[dd.id];
+      return !tt||tt.day>=tt.mc;
+    });
+    if(!allDone) document.getElementById('btn-basho-end').style.display='none';
   }
+
+  buildDiscTabs();
 }
 
 // ================================================================
 //  WIN PROBABILITY
 // ================================================================
-function winProb(w,opp){
-  const my=w.str*0.3+w.end*0.2+w.tec*0.3+w.men*0.2;
-  const op=opp.str*0.3+opp.end*0.2+opp.tec*0.3+opp.men*0.2;
-  const motF=0.82+(w.mot/100)*0.36;
-  let p=(my*motF)/((my*motF)+op);
-
-  const pers=PERSONALITIES.find(pp=>pp.id===w.pers);
-  if(pers.special==='mental') p=Math.min(0.95,p*1.06);
-
-  return Math.max(0.05,Math.min(0.95,p));
+function winProb(d,opp){
+  const myP=d.str*0.3+d.end*0.2+d.tec*0.3+d.men*0.2;
+  const opP=opp.str*0.3+opp.end*0.2+opp.tec*0.3+opp.men*0.2;
+  // Weight factor: heavier is slightly better, but not huge
+  const wMod=1+(d.weight-110)*0.001;
+  const motF=0.82+(d.mot/100)*0.36;
+  const injF=(d.injury&&d.injury.remaining>0)?(d.injury.severity==='heavy'?0.65:0.82):1;
+  let p=(myP*motF*wMod*injF)/((myP*motF*wMod*injF)+opP);
+  const pe=getP(d);
+  if(pe.special==='mental') p=Math.min(0.95,p*1.07);
+  return clamp(p,0.05,0.95);
 }
 
 // ================================================================
 //  MATCH
 // ================================================================
 function doMatch(){
-  const w=gs.w;
-  const t=gs.tour;
+  const d=getCurBashoDisc();
+  if(!d) return;
+  const t=GS.tour.discs[d.id];
+  if(!t||t.day>=t.mc) return;
+
   const opp=t.opps[t.day];
-  const wp=winProb(w,opp);
+  const wp=winProb(d,opp);
   const won=Math.random()<wp;
   const waza=WAZA[rnd(0,WAZA.length-1)];
 
   t.results.push(won?'win':'lose');
-  if(won){t.wins++;gs.totalWins++;}
-  else{t.loss++;gs.totalLoss++;}
+  if(won){t.wins++;d.wins++;}
+  else{t.loss++;d.losses++;}
   t.day++;
 
-  document.getElementById('match-pre').style.display='none';
-  document.getElementById('match-result').style.display='block';
-  const rb=document.getElementById('result-big');
-  rb.textContent=won?`${w.name} の勝ち！`:`${opp.name} の勝ち...`;
-  rb.className='match-result-big '+(won?'win-color':'lose-color');
-  document.getElementById('result-tech').textContent=`決まり手: ${waza}`;
+  // Tournament experience → small stat growth
+  if(won){
+    d.men=gc(d.men+rnd(0,2),d.menCap);
+    d.tec=gc(d.tec+rnd(0,1),d.tecCap);
+  }
 
-  addMsg(`${t.day}日目: ${won?'○':'●'} ${won?w.name:opp.name}（${waza}）`,won?'good':'bad');
+  document.getElementById('match-pre').style.display='none';
+  document.getElementById('match-res').style.display='block';
+  const rb=document.getElementById('res-big');
+  rb.textContent=won?`${d.name} の勝ち！`:`${opp.name} の勝ち...`;
+  rb.className='result-big '+(won?'wc':'lc');
+  document.getElementById('res-tech').textContent=`決まり手：${waza}`;
+
+  addMsg(`${t.day}日目: ${won?'○':'●'} ${won?d.name:opp.name}（${waza}）`,won?'mgg':'mgb');
 
   refreshBashoUI();
-  save();
+  saveGame();
 }
 
 function autoBasho(){
-  const t=gs.tour;
+  const d=getCurBashoDisc();
+  if(!d) return;
+  const t=GS.tour.discs[d.id];
+  if(!t) return;
   while(t.day<t.mc){
-    const w=gs.w;
     const opp=t.opps[t.day];
-    const won=Math.random()<winProb(w,opp);
+    const won=Math.random()<winProb(d,opp);
     const waza=WAZA[rnd(0,WAZA.length-1)];
     t.results.push(won?'win':'lose');
-    if(won){t.wins++;gs.totalWins++;}
-    else{t.loss++;gs.totalLoss++;}
+    if(won){t.wins++;d.wins++;}
+    else{t.loss++;d.losses++;}
     t.day++;
-    addMsg(`${t.day}日目: ${won?'○':'●'} (${waza})`,won?'good':'bad');
+    if(won){d.men=gc(d.men+rnd(0,1),d.menCap);}
+    addMsg(`${t.day}日目: ${won?'○':'●'} (${waza})`,won?'mgg':'mgb');
   }
   refreshBashoUI();
-  save();
+  saveGame();
 }
 
 // ================================================================
 //  RESULTS & RANK CHANGE
 // ================================================================
 function showResults(){
-  const w=gs.w;
-  const t=gs.tour;
-  const r=RANKS[w.rank];
-  const kachi=t.wins>t.loss;
-  const oldRank=w.rank;
+  GS.basho++;
 
-  // Rank change
-  let delta=0;
-  if(kachi){
-    const ex=t.wins-t.loss;
-    if(ex>=10) delta=3;
-    else if(ex>=7) delta=2;
-    else delta=1;
-    // Check special promotion threshold for Ozeki → Yokozuna
-    if(w.rank===8&&t.wins>=13) delta=1; // 大関→横綱 requires dominant performance
-  } else {
-    const ex=t.loss-t.wins;
-    if(ex>=8) delta=-3;
-    else if(ex>=5) delta=-2;
-    else delta=-1;
-  }
-  const newRank=Math.max(0,Math.min(RANKS.length-1,w.rank+delta));
-  w.rank=newRank;
+  let moneyGain=0;
+  // Sponsor bonus
+  GS.sponsors.forEach(s=>moneyGain+=s.amount);
 
-  // Age advance (every 6 basho = 1 year)
-  gs.basho++;
-  if(gs.basho%6===0) w.age++;
+  // Process each disciple
+  GS.disciples.filter(d=>!d.retired).forEach(d=>{
+    const t=GS.tour.discs[d.id];
+    if(!t) return;
 
-  // Recovery between basho
-  w.hp=Math.min(w.maxHp, w.hp+50);
-  w.mot=cap2(w.mot+(kachi?20:5));
+    const r=RANKS[d.rank];
+    const kachi=t.wins>t.loss;
+    const isJr=d.rank<4; // 幕下以下
 
-  // Small passive mental growth from tournament experience
-  w.men=cap(w.men+rnd(0,2));
+    // Money from tournaments
+    if(d.rank>=4) moneyGain+=50+d.rank*30+(kachi?50:0); // 関取以上は給金
+    else moneyGain+=kachi?20:5;
+
+    // Rank change: calculate delta in position using position-weighted system
+    const wins=t.wins, losses=t.loss;
+    const posDelta=calcPosChange(d.rank, d.pos, wins, losses);
+
+    // 大関 連続負け越し
+    if(d.rank===8){
+      if(!kachi) d.ozekiMakekoshi=(d.ozekiMakekoshi||0)+1;
+      else d.ozekiMakekoshi=0;
+    }
+    // 横綱 連続負け越し → 引退勧告
+    if(d.rank===9){
+      if(!kachi) d.yokozunaMakekoshi=(d.yokozunaMakekoshi||0)+1;
+      else d.yokozunaMakekoshi=0;
+      if(d.yokozunaMakekoshi>=2){
+        queueModal({
+          em:'🏳️',title:`${d.name} 引退勧告！`,
+          text:`横綱が2場所連続負け越しました。\n引退を勧告されています。\n\n続けますか？`,
+          choices:[
+            {label:'引退する',cb:()=>{d.retired=true;addMsg(`${d.name}が引退しました。`,`mgb`);}},
+            {label:'続行する（横綱の意地）',cb:()=>{}}
+          ]
+        });
+        d.yokozunaMakekoshi=0;
+      }
+    }
+
+    // Apply rank/position change
+    applyRankChange(d, posDelta, wins);
+
+    // Recovery
+    d.hp=clamp(d.hp+50,0,d.maxHp);
+    d.mot=cl2(d.mot+(kachi?20:5));
+    d.overTrain=Math.max(0,(d.overTrain||0)-2);
+
+    // Injury recovery
+    if(d.injury) d.injury.remaining=Math.max(0,d.injury.remaining-1);
+    if(d.injury&&d.injury.remaining<=0) d.injury=null;
+
+    // Age advance (every 6 basho)
+    if(GS.basho%6===0) d.age++;
+
+    d.tourResult={wins:t.wins,loss:t.loss,kachi};
+  });
+
+  GS.money=Math.max(0,GS.money+moneyGain);
 
   // Reset training
-  gs.phase='training';
-  gs.trainTurn=0;
+  const dojoBonus=(GS.facilities.dojo||1)>=3?2:(GS.facilities.dojo||1)>=2?1:0;
+  GS.actLeft=GS.actTotal+dojoBonus;
+  GS.phase='training';
+  GS.tour=null;
 
-  // Build results screen
-  document.getElementById('res-basho-label').textContent=`第${gs.basho}場所 結果`;
-  document.getElementById('res-record').textContent=`${t.wins}勝${t.loss}敗`;
-  document.getElementById('res-comment').textContent=kachi?'勝ち越し！':'負け越し...';
-  document.getElementById('res-comment').className='res-comment '+(kachi?'win-color':'lose-color');
-  document.getElementById('res-emoji').textContent=kachi?'🏆':'😔';
+  saveGame();
+  buildResultsScreen(moneyGain);
+  showScreen('scr-results');
+}
 
-  const oldN=RANKS[oldRank].name;
-  const newN=RANKS[newRank].name;
-  const rEl=document.getElementById('res-rank-change');
-  if(delta>0) rEl.innerHTML=`<span class="win-color">${oldN} → ${newN} ↑ 昇進！</span>`;
-  else if(delta<0) rEl.innerHTML=`<span class="lose-color">${oldN} → ${newN} ↓ 降格...</span>`;
-  else rEl.textContent=`${oldN} → ${newN}（変動なし）`;
+// ================================================================
+//  RANK CHANGE ENGINE (position-weighted movement)
+// ================================================================
+function calcPosChange(rank, pos, wins, losses){
+  const isJr=rank<4;
+  const maxPos=RANKS[rank].maxPos;
+  const posRatio=maxPos>1?(pos-1)/(maxPos-1):0; // 0=top, 1=bottom
 
-  // Growth
-  const snap=gs.statsSnap;
-  const SN={str:'筋力',end:'体力',tec:'技術',men:'精神力'};
-  let gHtml='';
-  ['str','end','tec','men'].forEach(s=>{
-    const d=w[s]-snap[s];
-    const sign=d>=0?'+':'';
-    gHtml+=`<div class="growth-row"><span class="growth-name">${SN[s]}</span>`+
-      `<span class="growth-num">${snap[s]} → ${w[s]}</span>`+
-      `<span class="growth-diff ${d>=0?'win-color':'lose-color'}">(${sign}${d})</span></div>`;
-  });
-  document.getElementById('res-growth').innerHTML=gHtml;
-
-  // Note
-  let note='';
-  if(newRank===4&&oldRank<4) note='🎊 十両昇進！これで「関取」だ！\n給料も出て、付け人もつく！';
-  if(newRank===9) note='⭐ 横綱昇進！最強の力士への道が開かれた！';
-  if(w.age>=32) note+=(note?'\n':'')+'⚠️ 年齢的に残り少ない。全力で挑め！';
-  document.getElementById('res-note').textContent=note;
-
-  save();
-  showScreen('results-screen');
-
-  // Check win / lose
-  if(newRank===9){
-    setTimeout(()=>showClear(),1200);
-  } else if(w.age>=36&&w.rank<9){
-    setTimeout(()=>showGameOver(),1500);
+  if(isJr){
+    // 7-match format
+    const diff=wins-losses; // +7 to -7
+    if(diff>=7) return -999; // 全勝 → special promotion
+    return -Math.round(diff*(2.5+posRatio*1.5));
+  } else {
+    // 15-match format: 8-7 is break-even
+    const diff=wins-8; // centered on 8 wins
+    if(diff===0) return 0; // 8勝7敗 → stay
+    return -Math.round(diff*(2.2+posRatio*1.4));
   }
 }
 
+function applyRankChange(d, posDelta, wins){
+  const r=RANKS[d.rank];
+  const losses=r.matches-wins;
+  const kachi=wins>losses;
+
+  // ── 横綱: 降格なし ──
+  if(d.rank===9) return;
+
+  // ── 大関: 特殊ルール ──
+  if(d.rank===8){
+    if(d.ozekiMakekoshi>=2){
+      // 2場所連続負け越し → 関脇降格
+      d.rank=7; d.pos=1; d.ozekiMakekoshi=0;
+      queueModal({em:'😢',title:`${d.name} 大関陥落`,text:`2場所連続負け越しにより\n大関から関脇に降格しました。`,choices:[{label:'了解',cb:()=>{}}]});
+    } else if(kachi&&wins>=13){
+      // 13勝以上2場所で横綱審議
+      d.ozekiTsunaCount=(d.ozekiTsunaCount||0)+1;
+      if(d.ozekiTsunaCount>=2){
+        // 横綱昇進
+        d.rank=9; d.pos=1; d.ozekiTsunaCount=0;
+        queueModal({em:'🏆',title:`${d.name} 横綱昇進！！`,text:`2場所連続13勝以上！\n横綱に昇進しました！！`,choices:[{label:'祝！',cb:()=>{}}]});
+      } else {
+        queueModal({em:'⭐',title:'綱取り場所！',text:`${d.name}が横綱昇進に\n王手をかけました！\n次の場所が勝負です！`,choices:[{label:'了解',cb:()=>{}}]});
+      }
+    } else {
+      d.ozekiTsunaCount=0; // リセット
+    }
+    return;
+  }
+
+  // ── 小結・関脇: 勝ち越し/負け越し ──
+  if(d.rank>=6){
+    if(kachi){
+      if(wins>=r.upWins&&d.rank<8){
+        d.rank++; d.pos=1;
+      }
+    } else {
+      if(wins<=(r.matches>>1)-3){
+        // 大きく負け越し → 降格
+        d.rank--; d.pos=RANKS[d.rank].maxPos;
+      }
+    }
+    // 大関昇進チェック
+    if(d.rank===7&&wins>=11){
+      d.rank=8; d.pos=1;
+      queueModal({em:'🌟',title:`${d.name} 大関昇進！`,text:`関脇で大活躍！\n大関に昇進しました！`,choices:[{label:'祝！',cb:()=>{}}]});
+    }
+    return;
+  }
+
+  // ── 十両・前頭: ポジション移動 ──
+  if(d.rank>=4){
+    let newPos=d.pos+posDelta;
+    let newRank=d.rank;
+    // 前頭最高位から小結へ昇進
+    if(newRank===5&&newPos<1){
+      newRank=6; newPos=1;
+    } else if(newRank===4&&newPos<1){
+      newRank=5; newPos=RANKS[5].maxPos+newPos;
+      if(newPos<1) newPos=1;
+    }
+    // 十両から前頭降格
+    if(newPos>RANKS[newRank].maxPos&&newRank===5){
+      const excess=newPos-RANKS[5].maxPos;
+      newRank=4; newPos=excess;
+    }
+    // 十両から幕下降格
+    if(newPos>RANKS[newRank].maxPos&&newRank===4){
+      const excess=newPos-RANKS[4].maxPos;
+      newRank=3; newPos=excess;
+    }
+    newRank=clamp(newRank,0,9);
+    newPos=clamp(newPos,1,RANKS[newRank].maxPos);
+    d.rank=newRank; d.pos=newPos;
+    return;
+  }
+
+  // ── 幕下以下: ポジション移動 ──
+  let newPos=d.pos+posDelta;
+  let newRank=d.rank;
+
+  // 幕下全勝 → 十両昇進
+  if(d.rank===3&&wins===7){
+    newRank=4; newPos=RANKS[4].maxPos;
+    d.rank=newRank; d.pos=newPos;
+    queueModal({em:'🎉',title:'十両昇進！',text:`${d.name}が幕下で全勝！\n十両に昇進しました！`,choices:[{label:'祝！',cb:()=>{}}]});
+    return;
+  }
+
+  // 上のランクへ移動
+  while(newPos<1&&newRank<RANKS.length-1){
+    newRank++;
+    if(newRank>=4){newPos=RANKS[newRank].maxPos;break;}
+    newPos=RANKS[newRank].maxPos+newPos;
+    if(newPos<1) newPos=1;
+  }
+
+  // 下のランクへ移動（序ノ口は落ちない）
+  while(newPos>RANKS[newRank].maxPos&&newRank>0){
+    const excess=newPos-RANKS[newRank].maxPos;
+    newRank--;
+    newPos=excess;
+    if(newPos<1) newPos=1;
+  }
+
+  // 序ノ口のフロア
+  if(newRank===0) newPos=clamp(newPos,1,RANKS[0].maxPos);
+
+  newRank=clamp(newRank,0,RANKS.length-1);
+  newPos=clamp(newPos,1,RANKS[newRank].maxPos||1);
+  d.rank=newRank; d.pos=newPos;
+}
+
+function buildResultsScreen(moneyGain){
+  document.getElementById('res-basho-label').textContent=`第${GS.basho}場所 結果`;
+  const area=document.getElementById('disc-results-area');
+  area.innerHTML='';
+
+  GS.disciples.filter(d=>!d.retired&&d.tourResult).forEach(d=>{
+    const tr=d.tourResult;
+    const kachi=tr.kachi;
+    const snap=d.statsSnap||{str:d.str,end:d.end,tec:d.tec,men:d.men};
+
+    const div=document.createElement('div');
+    div.className='pbox slide-up';
+    const SN={str:'筋力',end:'体力',tec:'技術',men:'精神'};
+    const growthRows=Object.entries(SN).map(([k,n])=>{
+      const diff=d[k]-(snap[k]||d[k]);
+      return `<div class="grow-row"><span style="color:var(--gold2)">${n}</span><span>${snap[k]||d[k]} → ${d[k]}</span><span class="${diff>=0?'wc':'lc'}">(${diff>=0?'+':''}${diff})</span></div>`;
+    }).join('');
+
+    div.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--gold3);">${d.name}</span>
+        <span class="${kachi?'wc':'lc'}" style="font-size:18px;font-weight:bold;">${tr.wins}勝${tr.loss}敗</span>
+      </div>
+      <div style="font-size:11px;margin-bottom:5px;" class="${kachi?'wc':'lc'}">${kachi?'✓ 勝ち越し！':'✗ 負け越し...'}</div>
+      <div style="font-size:11px;color:var(--cream);margin-bottom:5px;">番付：${rankDisplay(d)}</div>
+      <div class="sec-title" style="margin-top:6px;">▶ 場所前比較</div>
+      ${growthRows}
+    `;
+    area.appendChild(div);
+  });
+
+  // Money earned
+  const mdiv=document.createElement('div');
+  mdiv.className='pbox-green pbox';
+  mdiv.innerHTML=`<div style="font-size:11px;color:#7eff9a;">💴 今場所の収入：+${moneyGain}両　現在：${GS.money}両</div>`;
+  area.appendChild(mdiv);
+
+  // Check win/gameover conditions
+  const hasYoko=GS.disciples.some(d=>d.rank>=9);
+  const allOld=GS.disciples.every(d=>d.retired||(d.age>=36&&d.rank<9));
+  if(hasYoko) setTimeout(()=>showClear(),1200);
+  else if(allOld) setTimeout(()=>showGameOver(),1500);
+}
+
 // ================================================================
-//  GAME CLEAR
+//  CLEAR / GAMEOVER
 // ================================================================
 function showClear(){
-  const w=gs.w;
+  const yk=GS.disciples.find(d=>d.rank>=9)||GS.disciples[0];
   document.getElementById('clear-msg').textContent=
-    `${w.name}が横綱に昇進した！\n\n`+
-    `${w.age}歳での偉業達成！\n`+
-    `通算 ${gs.totalWins}勝 ${gs.totalLoss}敗\n`+
-    `第${gs.basho}場所での横綱誕生！`;
+    `${yk.name}が横綱に昇進した！\n\n${yk.age}歳での偉業達成！\n通算 ${yk.wins}勝 ${yk.losses}敗\n第${GS.basho}場所での横綱誕生！`;
   document.getElementById('clear-stats').innerHTML=
-    `筋力: ${w.str} ／ 体力: ${w.end}<br>技術: ${w.tec} ／ 精神力: ${w.men}<br>体重: ${w.weight}kg`;
+    `筋力:${yk.str} ／ 体力:${yk.end}<br>技術:${yk.tec} ／ 精神:${yk.men}<br>体重:${yk.weight}kg`;
   clearSave();
-  showScreen('clear-screen');
+  showScreen('scr-clear');
 }
-
-// ================================================================
-//  GAME OVER
-// ================================================================
 function showGameOver(){
-  const w=gs.w;
+  const best=GS.disciples.sort((a,b)=>rankScore(b)-rankScore(a))[0]||GS.disciples[0];
   document.getElementById('go-msg').textContent=
-    `${w.name}は${w.age}歳で現役を引退した。\n\n`+
-    `最高位: ${rankName()}\n`+
-    `通算 ${gs.totalWins}勝 ${gs.totalLoss}敗\n\n`+
-    `横綱への夢は...叶わなかった。\nまた挑戦しよう！`;
+    `全力士が引退した。\n\n最高位：${rankDisplay(best)}\n通算 ${best.wins}勝 ${best.losses}敗\n\n横綱への夢は叶わなかった...\nまた挑戦しよう！`;
   clearSave();
-  showScreen('gameover-screen');
-}
-
-// ================================================================
-//  CREATE SCREEN
-// ================================================================
-function buildSelBtn(container,items,curId,setFn){
-  container.innerHTML='';
-  items.forEach(item=>{
-    const btn=document.createElement('button');
-    btn.className='sel-btn'+(curId===item.id?' selected':'');
-    btn.innerHTML=`<span class="sel-emoji">${item.emoji}</span>`+
-      `<span class="sel-name">${item.name}</span>`+
-      `<span class="sel-desc">${item.desc}</span>`;
-    btn.addEventListener('click',()=>{setFn(item.id);});
-    container.appendChild(btn);
-  });
-}
-
-function buildBodySel(){buildSelBtn(document.getElementById('body-select'),BODY_TYPES,selBody,id=>{selBody=id;buildBodySel();updatePreview();});}
-function buildPersSel(){buildSelBtn(document.getElementById('pers-select'),PERSONALITIES,selPers,id=>{selPers=id;buildPersSel();updatePreview();});}
-
-function updatePreview(){
-  const bt=BODY_TYPES.find(b=>b.id===selBody);
-  const p=PERSONALITIES.find(p=>p.id===selPers);
-  const s=bt.stats;
-  document.getElementById('create-preview').innerHTML=
-    `<span style="color:var(--gold3)">▶ 初期能力プレビュー</span><br>`+
-    `筋力:${s.str} 体力:${s.end} 技術:${s.tec} 精神:${s.men}<br>`+
-    `体重:${s.weight}kg | 最大HP:${s.hp}<br>`+
-    `<span style="color:var(--gray)">性格：${p.name} (${p.desc.replace(/\n/,' | ')})</span>`;
-}
-
-function initCreateScreen(){
-  selBody='balance'; selPers='earnest';
-  buildBodySel(); buildPersSel(); updatePreview();
-  document.getElementById('inp-name').value='';
-  showScreen('create-screen');
-}
-
-// ================================================================
-//  MAIN SCREEN INIT
-// ================================================================
-function initMainScreen(){
-  curMsgBox='msg-main';
-  clearMsg('msg-main');
-  document.getElementById('training-area').style.display='block';
-  document.getElementById('btn-goto-basho').style.display='none';
-  updateMainHeader();
-  buildCmdGrid();
-  addMsg(`【第${gs.basho+1}場所前稽古】`,'event');
-  addMsg(`稽古メニューから${gs.maxTrainTurns}回鍛えよう！`,'normal');
-  if(gs.w.rank>=4) addMsg(`今の番付: ${rankName()}（関取）`,'gray');
-  else addMsg(`今の番付: ${rankName()}`,'gray');
-  showScreen('main-screen');
+  showScreen('scr-gameover');
 }
 
 // ================================================================
 //  EVENT LISTENERS
 // ================================================================
-document.getElementById('btn-new').addEventListener('click',()=>{
-  clearSave(); gs=null; initCreateScreen();
-});
-
+document.getElementById('btn-new').addEventListener('click',()=>{clearSave();GS=null;initCreateScreen();});
 document.getElementById('btn-load').addEventListener('click',()=>{
-  if(load()){
-    if(gs.phase==='training') initMainScreen();
+  if(loadGame()){
+    if(GS.phase==='training') initMainScreen();
     else showBashoScreen();
   } else {
     showModal('❌','セーブデータなし','セーブデータが見つかりません。\n新しくゲームを始めてください。','bad');
   }
 });
 
-document.getElementById('btn-start').addEventListener('click',()=>{
+document.getElementById('btn-create-start').addEventListener('click',()=>{
   const name=document.getElementById('inp-name').value.trim();
   if(!name){showModal('⚠️','名前を入力','四股名を入力してください！','bad');return;}
-  gs=newState(name,selBody,selPers);
-  save();
+  newGame(name,selSkin,selFace,selBody,selPers);
+  saveGame();
   initMainScreen();
 });
 
-document.getElementById('btn-goto-basho').addEventListener('click',()=>{
-  startBasho();
-});
-
-document.getElementById('btn-fight').addEventListener('click',()=>{
-  doMatch();
-});
-
+document.getElementById('btn-to-basho').addEventListener('click',()=>startBasho());
+document.getElementById('btn-fight').addEventListener('click',()=>doMatch());
 document.getElementById('btn-auto').addEventListener('click',()=>{
-  autoBasho();
+  // Auto for ALL disciples
+  GS.disciples.filter(d=>!d.retired).forEach(d=>{
+    const t=GS.tour.discs[d.id];
+    if(!t) return;
+    while(t.day<t.mc){
+      const opp=t.opps[t.day];
+      const won=Math.random()<winProb(d,opp);
+      const waza=WAZA[rnd(0,WAZA.length-1)];
+      t.results.push(won?'win':'lose');
+      if(won){t.wins++;d.wins++;}
+      else{t.loss++;d.losses++;}
+      t.day++;
+      if(won) d.men=gc(d.men+rnd(0,1),d.menCap);
+    }
+  });
+  clearMsg('msg-basho');
+  const d=getCurBashoDisc();
+  const t=GS.tour.discs[d.id];
+  addMsg(`一括進行: ${t.wins}勝${t.loss}敗`,t.wins>t.loss?'mgg':'mgb');
+  refreshBashoUI();
+  saveGame();
 });
-
-document.getElementById('btn-end-basho').addEventListener('click',()=>{
-  showResults();
-});
-
-document.getElementById('btn-next-train').addEventListener('click',()=>{
-  initMainScreen();
-});
-
-document.getElementById('btn-clear-restart').addEventListener('click',()=>{
-  showScreen('title-screen');
-});
-
-document.getElementById('btn-retry').addEventListener('click',()=>{
-  showScreen('title-screen');
-});
+document.getElementById('btn-basho-end').addEventListener('click',()=>showResults());
+document.getElementById('btn-next').addEventListener('click',()=>initMainScreen());
+document.getElementById('btn-clear-restart').addEventListener('click',()=>showScreen('scr-title'));
+document.getElementById('btn-retry').addEventListener('click',()=>showScreen('scr-title'));
 
 // ================================================================
 //  INIT
 // ================================================================
 window.addEventListener('load',()=>{
-  const hasSave=!!localStorage.getItem(SAVE_KEY);
-  const loadBtn=document.getElementById('btn-load');
-  loadBtn.disabled=!hasSave;
-  loadBtn.style.opacity=hasSave?'1':'0.35';
+  const has=!!localStorage.getItem(SK);
+  document.getElementById('btn-load').disabled=!has;
+  document.getElementById('btn-load').style.opacity=has?'1':'0.35';
 });
 </script>
 </body>
