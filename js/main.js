@@ -43,20 +43,73 @@ function showConfirm(message, onYes) {
 // ダッシュボードの表示を更新する
 function updateDashboard() {
   const s = gameState.stable;
+
+  // ヘッダー
   document.getElementById('dashboard-stable-name').textContent = s.name;
+  document.getElementById('dashboard-phase-badge').textContent = getCurrentPhaseName();
+  const nb = getNextBashoInfo();
   document.getElementById('dashboard-basho-info').textContent =
-    `${gameState.year}年 ${getCurrentBashoName()}`;
+    `${nb.year}年${nb.month}月 ${nb.name}`;
+
+  // 部屋ステータス
   document.getElementById('dashboard-reputation').textContent = s.reputation;
   document.getElementById('dashboard-funds').textContent = `${s.funds.toLocaleString()}万円`;
   document.getElementById('dashboard-supporters').textContent = `${s.supporters}人`;
-  const avgFacility = Math.floor(
+  const avgFacility = Math.round(
     (s.facilities.trainingHall + s.facilities.chankoHall + s.facilities.dormitory) / 3
   );
-  document.getElementById('dashboard-facility').textContent = `Lv.${avgFacility}`;
+  document.getElementById('dashboard-facility').textContent = avgFacility;
+
+  // 力士ステータス
   const active = getActiveWrestlers();
   document.getElementById('dashboard-wrestler-count').textContent = `${active.length}人`;
   document.getElementById('dashboard-sekitori-count').textContent = `${getSekitori().length}人`;
-  document.getElementById('dashboard-top-rank').textContent = getTopRank();
+  const topRank = getTopRank();
+  const topRankEl = document.getElementById('dashboard-top-rank');
+  topRankEl.textContent = topRank;
+  topRankEl.style.color = getRankColor(active.length
+    ? active.reduce((p, c) => c.rankIndex > p.rankIndex ? c : p).rankIndex
+    : 0);
+  document.getElementById('dashboard-next-basho').textContent =
+    `${nb.year}年${nb.month}月 ${nb.name}`;
+
+  // 力士ラインナップ
+  renderDashboardWrestlers();
+}
+
+// ダッシュボードの力士ラインナップを描画する
+function renderDashboardWrestlers() {
+  const lineup  = document.getElementById('dashboard-wrestler-lineup');
+  const active  = getActiveWrestlers();
+
+  if (active.length === 0) {
+    lineup.innerHTML = '<p class="lineup-empty">在籍力士がいません</p>';
+    return;
+  }
+
+  // 番付の高い順にソート
+  const sorted = [...active].sort((a, b) => b.rankIndex - a.rankIndex);
+
+  lineup.innerHTML = sorted.map(w => {
+    const pv         = getPhysiqueVisual(w.physique);
+    const rankColor  = getRankColor(w.rankIndex);
+    return `
+      <div class="lineup-card" data-id="${w.id}">
+        <div class="lineup-icon" style="color:${pv.color}; border-color:${rankColor}">${pv.char}</div>
+        <div class="lineup-name">${w.name}</div>
+        <div class="lineup-rank" style="color:${rankColor}">${w.rank}</div>
+      </div>
+    `;
+  }).join('');
+
+  // カードタップで詳細に遷移
+  lineup.querySelectorAll('.lineup-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.id;
+      const wrestler = gameState.wrestlers.find(w => w.id === id);
+      if (wrestler) showWrestlerDetail(wrestler);
+    });
+  });
 }
 
 // 力士一覧の表示を更新する
@@ -220,9 +273,42 @@ function retireWrestler(wrestler) {
 // 設備管理画面を更新する
 function updateFacilityScreen() {
   const f = gameState.stable.facilities;
-  document.getElementById('facility-training-level').textContent = `Lv.${f.trainingHall}`;
-  document.getElementById('facility-chanko-level').textContent = `Lv.${f.chankoHall}`;
-  document.getElementById('facility-dormitory-level').textContent = `Lv.${f.dormitory}`;
+  const facilityData = [
+    { key: 'trainingHall', levelId: 'facility-training-level' },
+    { key: 'chankoHall',   levelId: 'facility-chanko-level'   },
+    { key: 'dormitory',    levelId: 'facility-dormitory-level' }
+  ];
+
+  facilityData.forEach(({ key, levelId }) => {
+    document.getElementById(levelId).textContent = `Lv.${f[key]}`;
+  });
+
+  // アップグレードボタンのラベルと動作を設定する
+  document.querySelectorAll('[data-facility]').forEach(btn => {
+    const key          = btn.dataset.facility;
+    const currentLevel = f[key];
+    const costs        = FACILITY_UPGRADE_COST[key];
+    const maxLevel     = costs.length - 1;
+
+    if (currentLevel >= maxLevel) {
+      btn.textContent = '最大Lv';
+      btn.disabled    = true;
+    } else {
+      const cost      = costs[currentLevel + 1];
+      btn.textContent = `強化 ${cost}万円`;
+      btn.disabled    = false;
+      btn.onclick     = () => {
+        const result = upgradeFacility(key);
+        if (result.success) {
+          showToast(`${FACILITY_NAMES[key]}をLv.${f[key]}に強化しました`);
+          updateFacilityScreen();
+          updateDashboard();
+        } else {
+          showToast(result.reason);
+        }
+      };
+    }
+  });
 }
 
 // 後援会画面を更新する
@@ -262,22 +348,29 @@ function setupBackButtons() {
   document.querySelectorAll('[data-back]').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.back;
-      if (target === 'dashboard-screen') updateDashboard();
+      if (target === 'dashboard-screen')     updateDashboard();
       if (target === 'wrestler-list-screen') updateWrestlerList();
+      if (target === 'home-screen')          syncHomeButtons();
       showScreen(target);
     });
   });
 }
 
-// ダッシュボードのナビゲーションを設定する
+// ホーム画面のボタン状態を最新のセーブ状況に同期する
+function syncHomeButtons() {
+  document.getElementById('btn-continue').disabled = !hasSaveData();
+}
+
+// data-screen 属性を持つ全ボタンのナビゲーションを設定する
 function setupDashboardNav() {
-  document.querySelectorAll('.btn-nav[data-screen]').forEach(btn => {
+  document.querySelectorAll('[data-screen]').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (!gameState) return;
       const target = btn.dataset.screen;
       if (target === 'wrestler-list-screen') updateWrestlerList();
-      if (target === 'facility-screen') updateFacilityScreen();
-      if (target === 'supporter-screen') updateSupporterScreen();
-      if (target === 'history-screen') updateHistoryScreen();
+      if (target === 'facility-screen')      updateFacilityScreen();
+      if (target === 'supporter-screen')     updateSupporterScreen();
+      if (target === 'history-screen')       updateHistoryScreen();
       showScreen(target);
     });
   });

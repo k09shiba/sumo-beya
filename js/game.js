@@ -12,8 +12,14 @@ const SEKITORI_RANK_INDEX = 4;
 // 場所名
 const BASHO_NAMES = ['初場所', '春場所', '夏場所', '名古屋場所', '秋場所', '九州場所'];
 
+// 場所の開催月（1/3/5/7/9/11月）
+const BASHO_MONTHS = [1, 3, 5, 7, 9, 11];
+
 // 場所の開催地
 const BASHO_LOCATIONS = ['東京', '大阪', '東京', '名古屋', '東京', '福岡'];
+
+// フェーズの表示名
+const PHASE_NAMES = { training: '場所間', basho: '本場所', result: '場所結果' };
 
 // 現在のゲーム状態
 let gameState = null;
@@ -41,9 +47,28 @@ function getCurrentBashoName() {
   return BASHO_NAMES[(gameState.basho - 1) % 6];
 }
 
+// 現在の場所の開催月を返す
+function getCurrentBashoMonth() {
+  return BASHO_MONTHS[(gameState.basho - 1) % 6];
+}
+
 // 現在の場所の開催地を返す
 function getCurrentBashoLocation() {
   return BASHO_LOCATIONS[(gameState.basho - 1) % 6];
+}
+
+// 次の場所の情報（年・月・場所名）を返す
+function getNextBashoInfo() {
+  return {
+    year:  gameState.year,
+    month: getCurrentBashoMonth(),
+    name:  getCurrentBashoName()
+  };
+}
+
+// 現在のフェーズ名を返す
+function getCurrentPhaseName() {
+  return PHASE_NAMES[gameState.phase] || '場所間';
 }
 
 // 在籍力士（引退していない）を返す

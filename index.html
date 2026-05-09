@@ -31,6 +31,7 @@
   <!-- 部屋名入力画面 -->
   <section id="stable-name-screen" class="screen">
     <div class="screen-header">
+      <button class="btn btn-back" data-back="home-screen">←</button>
       <h2>部屋の名前を決めてください</h2>
     </div>
     <div class="screen-content">
@@ -45,16 +46,29 @@
   <!-- 部屋ダッシュボード -->
   <section id="dashboard-screen" class="screen">
     <div class="screen-header">
-      <h2 id="dashboard-stable-name">〇〇部屋</h2>
-      <div class="basho-info" id="dashboard-basho-info">2024年 初場所</div>
+      <div class="dashboard-header-info">
+        <h2 id="dashboard-stable-name">〇〇部屋</h2>
+        <div class="phase-badge" id="dashboard-phase-badge">場所間</div>
+      </div>
+      <div class="basho-info" id="dashboard-basho-info">2024年1月 初場所</div>
     </div>
     <div class="screen-content">
+      <!-- 在籍力士メインビジュアル -->
+      <div class="card no-pad">
+        <div class="lineup-header">
+          <span class="card-title-inline">在籍力士</span>
+          <button class="btn-link" data-screen="wrestler-list-screen">一覧を見る →</button>
+        </div>
+        <div class="wrestler-lineup" id="dashboard-wrestler-lineup">
+          <!-- 動的生成 -->
+        </div>
+      </div>
       <!-- 部屋ステータス -->
       <div class="card">
         <h3 class="card-title">部屋の状況</h3>
         <div class="status-grid">
           <div class="status-item">
-            <span class="status-label">名声</span>
+            <span class="status-label">名声レベル</span>
             <span class="status-value" id="dashboard-reputation">0</span>
           </div>
           <div class="status-item">
@@ -66,15 +80,15 @@
             <span class="status-value" id="dashboard-supporters">0人</span>
           </div>
           <div class="status-item">
-            <span class="status-label">設備</span>
-            <span class="status-value" id="dashboard-facility">Lv.1</span>
+            <span class="status-label">設備Lv</span>
+            <span class="status-value" id="dashboard-facility">1</span>
           </div>
         </div>
       </div>
       <!-- 力士ステータス -->
       <div class="card">
         <h3 class="card-title">力士の状況</h3>
-        <div class="status-grid">
+        <div class="status-grid status-grid-3">
           <div class="status-item">
             <span class="status-label">在籍数</span>
             <span class="status-value" id="dashboard-wrestler-count">0人</span>
@@ -88,6 +102,10 @@
             <span class="status-value" id="dashboard-top-rank">序ノ口</span>
           </div>
         </div>
+        <div class="next-basho-row">
+          <span class="status-label">次の場所</span>
+          <span class="next-basho-value" id="dashboard-next-basho">―</span>
+        </div>
       </div>
       <!-- ナビゲーション -->
       <nav class="dashboard-nav">
@@ -97,7 +115,7 @@
         <button class="btn btn-nav" data-screen="supporter-screen">後援会</button>
         <button class="btn btn-nav" data-screen="history-screen">部屋の歴史</button>
       </nav>
-      <button id="btn-start-basho" class="btn btn-primary btn-large">場所へ出陣</button>
+      <button id="btn-start-basho" class="btn btn-primary btn-large btn-basho">場所へ出陣</button>
     </div>
   </section>
 
