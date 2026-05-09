@@ -339,6 +339,7 @@ body {
   width: 80px;
   height: 80px;
   background-color: var(--color-navy);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius);
   display: flex;
   align-items: center;
@@ -730,6 +731,108 @@ body {
   color: var(--color-text-sub);
   margin-bottom: 12px;
   line-height: 1.6;
+}
+
+/* 稽古指示 */
+.training-note {
+  margin-bottom: 10px;
+}
+
+.training-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-training {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  width: auto;
+  min-height: 56px;
+  transition: border-color var(--transition);
+}
+
+.btn-training:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-training:not(:disabled):hover {
+  border-color: var(--color-gold);
+}
+
+.training-name {
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: var(--color-cream);
+}
+
+.training-desc {
+  font-family: var(--font-main);
+  font-size: 10px;
+  color: var(--color-text-sub);
+}
+
+/* 過去対戦記録 */
+.match-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.match-history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+
+.match-history-item:last-child {
+  border-bottom: none;
+}
+
+.match-history-result {
+  font-size: 16px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.match-history-result.win {
+  color: var(--color-win);
+}
+
+.match-history-result.lose {
+  color: #666;
+}
+
+.match-history-opponent {
+  flex: 1;
+  color: var(--color-cream);
+}
+
+.match-history-kimarite {
+  color: var(--color-text-sub);
+  font-size: 11px;
+}
+
+.match-history-date {
+  color: var(--color-text-sub);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* 力士カードのアイコン（体格・番付反映） */
+.wrestler-card-icon {
+  border: 2px solid var(--color-border);
 }
 
 /* ユーティリティ */

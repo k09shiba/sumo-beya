@@ -82,42 +82,111 @@ function updateWrestlerList() {
 
 // 力士詳細画面を表示する
 function showWrestlerDetail(wrestler) {
+  const rankColor   = getRankColor(wrestler.rankIndex);
+  const physVisual  = getPhysiqueVisual(wrestler.physique);
+  const potColor    = getPotentialColor(wrestler.potential);
+
+  // ビジュアルアイコン（体格・番付反映）
+  const visualEl = document.getElementById('detail-visual');
+  visualEl.style.borderColor = rankColor;
+  visualEl.innerHTML = `<div class="wrestler-icon" style="color:${physVisual.color}">${physVisual.char}</div>`;
+
   document.getElementById('detail-wrestler-name').textContent = wrestler.name;
-  document.getElementById('detail-rank').textContent = wrestler.rank;
+
+  // 番付（ランク色付き）
+  const rankEl = document.getElementById('detail-rank');
+  rankEl.textContent = wrestler.rank;
+  rankEl.style.color = rankColor;
+
   document.getElementById('detail-age').textContent = `${wrestler.age}歳`;
+
   const originText = wrestler.origin.country === '日本'
-    ? wrestler.origin.prefecture
-    : wrestler.origin.country;
-  document.getElementById('detail-origin').textContent = `${originText}出身`;
+    ? `${wrestler.origin.prefecture}出身`
+    : `${wrestler.origin.country}出身`;
+  document.getElementById('detail-origin').textContent = originText;
   document.getElementById('detail-style').textContent = `${wrestler.style} / ${wrestler.physique}`;
+
   // 能力値バー
   const s = wrestler.stats;
-  setStatBar('stamina', s.stamina);
-  setStatBar('strength', s.strength);
+  setStatBar('stamina',   s.stamina);
+  setStatBar('strength',  s.strength);
   setStatBar('technique', s.technique);
-  setStatBar('mental', s.mental);
-  document.getElementById('stat-weight').style.width = `${Math.min(100, s.weight / 2.5)}%`;
+  setStatBar('mental',    s.mental);
+  // 体重バー（230kgを上限として計算）
+  const weightPct = Math.min(100, Math.round((s.weight / 230) * 100));
+  document.getElementById('stat-weight').style.width = `${weightPct}%`;
   document.getElementById('stat-weight-num').textContent = `${s.weight}kg`;
-  document.getElementById('detail-potential').textContent = wrestler.potential;
+
+  // 伸びしろ（色付き）
+  const potEl = document.getElementById('detail-potential');
+  potEl.textContent = wrestler.potential;
+  potEl.style.color = potColor;
+
+  // 成績
   document.getElementById('detail-career-record').textContent =
     `${wrestler.careerRecord.wins}勝${wrestler.careerRecord.losses}敗`;
   document.getElementById('detail-basho-record').textContent =
     `${wrestler.bashoRecord.wins}勝${wrestler.bashoRecord.losses}敗`;
-  document.getElementById('detail-highest-rank').textContent = wrestler.highestRank;
+
+  const highestRankEl = document.getElementById('detail-highest-rank');
+  highestRankEl.textContent = wrestler.highestRank;
+  highestRankEl.style.color = getRankColor(wrestler.highestRankIndex || 0);
+
+  // プロフィール詳細
+  document.getElementById('detail-origin-detail').textContent =
+    wrestler.origin.country === '日本' ? wrestler.origin.prefecture : wrestler.origin.country;
+  document.getElementById('detail-education').textContent = wrestler.origin.education;
+  document.getElementById('detail-sumo-exp').textContent =
+    wrestler.origin.sumoExperience ? 'あり' : 'なし';
+
+  // 食事方針
   document.getElementById('detail-diet-policy').value = wrestler.dietPolicy;
-  // 食事方針変更
   document.getElementById('detail-diet-policy').onchange = (e) => {
     wrestler.dietPolicy = e.target.value;
     saveState();
     showToast(`${wrestler.name}の食事方針を「${wrestler.dietPolicy}」に変更しました`);
   };
+
+  // 稽古指示（フェーズ4で有効化 - 現在は場所間のみ操作可能と表示）
+  const inTraining = gameState.phase === 'training';
+  document.getElementById('detail-training-note').textContent =
+    inTraining ? '稽古指示を選んでください（フェーズ4実装予定）' : '場所間フェーズで稽古を指示できます';
+
+  // 過去対戦記録
+  renderMatchHistory(wrestler);
+
   // 引退ボタン
   document.getElementById('btn-retire-wrestler').onclick = () => {
     showConfirm(`${wrestler.name}を引退させますか？`, () => {
       retireWrestler(wrestler);
     });
   };
+
   showScreen('wrestler-detail-screen');
+}
+
+// 過去対戦記録を描画する
+function renderMatchHistory(wrestler) {
+  const container = document.getElementById('detail-match-history');
+  const history   = wrestler.matchHistory || [];
+  if (history.length === 0) {
+    container.innerHTML = '<p class="info-text">まだ対戦記録がありません。</p>';
+    return;
+  }
+  // 直近10件を新しい順で表示
+  const recent = [...history].reverse().slice(0, 10);
+  container.innerHTML = recent.map(m => {
+    const resultClass = m.win ? 'win' : 'lose';
+    const resultText  = m.win ? '○' : '●';
+    return `
+      <div class="match-history-item">
+        <span class="match-history-result ${resultClass}">${resultText}</span>
+        <span class="match-history-opponent">${m.opponentName}</span>
+        <span class="match-history-kimarite">${m.kimarite}</span>
+        <span class="match-history-date">${m.year}年${BASHO_NAMES[(m.basho - 1) % 6]}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 // 能力値バーをセットする

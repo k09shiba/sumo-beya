@@ -188,10 +188,56 @@
       <div class="card">
         <h3 class="card-title">食事方針</h3>
         <select id="detail-diet-policy" class="select-input">
-          <option value="標準食">標準食</option>
-          <option value="増量食">増量食</option>
-          <option value="絞り食">絞り食</option>
+          <option value="標準食">標準食（バランス型・現状維持）</option>
+          <option value="増量食">増量食（体重増加・筋力強化）</option>
+          <option value="絞り食">絞り食（体重減少・機動力維持）</option>
         </select>
+      </div>
+      <!-- 稽古指示 -->
+      <div class="card">
+        <h3 class="card-title">稽古指示</h3>
+        <p class="info-text training-note" id="detail-training-note">場所間フェーズで稽古を指示できます</p>
+        <div class="training-buttons">
+          <button class="btn btn-training" data-training="基礎稽古" disabled>
+            <span class="training-name">基礎稽古</span>
+            <span class="training-desc">体力・筋力の基礎強化</span>
+          </button>
+          <button class="btn btn-training" data-training="申し合い稽古" disabled>
+            <span class="training-name">申し合い稽古</span>
+            <span class="training-desc">技・精神強化</span>
+          </button>
+          <button class="btn btn-training" data-training="ぶつかり稽古" disabled>
+            <span class="training-name">ぶつかり稽古</span>
+            <span class="training-desc">筋力・精神の大幅強化</span>
+          </button>
+          <button class="btn btn-training" data-training="自主トレ" disabled>
+            <span class="training-name">自主トレ</span>
+            <span class="training-desc">任意の能力を選んで強化</span>
+          </button>
+        </div>
+      </div>
+      <!-- 過去対戦記録 -->
+      <div class="card">
+        <h3 class="card-title">過去対戦記録</h3>
+        <div id="detail-match-history" class="match-history-list">
+          <p class="info-text">まだ対戦記録がありません。</p>
+        </div>
+      </div>
+      <!-- 出自詳細 -->
+      <div class="card">
+        <h3 class="card-title">プロフィール詳細</h3>
+        <div class="record-row">
+          <span>出身</span>
+          <span id="detail-origin-detail">―</span>
+        </div>
+        <div class="record-row">
+          <span>学歴</span>
+          <span id="detail-education">―</span>
+        </div>
+        <div class="record-row">
+          <span>相撲経験</span>
+          <span id="detail-sumo-exp">―</span>
+        </div>
       </div>
       <!-- 引退ボタン -->
       <button id="btn-retire-wrestler" class="btn btn-danger">引退させる</button>
