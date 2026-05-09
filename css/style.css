@@ -1,0 +1,750 @@
+/* 変数定義 */
+:root {
+  --color-bg: #0d1117;
+  --color-bg-card: #1a2133;
+  --color-navy: #1a2744;
+  --color-red: #8b1a1a;
+  --color-red-light: #c0392b;
+  --color-gold: #c9a84c;
+  --color-cream: #f5f0e8;
+  --color-text: #e8e0d0;
+  --color-text-sub: #9a8f80;
+  --color-border: #2a3550;
+  --color-success: #27ae60;
+  --color-danger: #c0392b;
+  --color-win: #f1c40f;
+  --color-lose: #888;
+  --font-main: 'DotGothic16', monospace;
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+/* リセット */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 画面共通 */
+.screen {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: var(--color-bg);
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* スクロールバー */
+.screen::-webkit-scrollbar {
+  width: 4px;
+}
+.screen::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+.screen::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* ヘッダー */
+.screen-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--color-navy);
+  border-bottom: 2px solid var(--color-gold);
+  min-height: 56px;
+}
+
+.screen-header h2 {
+  font-size: 16px;
+  color: var(--color-gold);
+  flex: 1;
+}
+
+/* コンテンツ領域 */
+.screen-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+/* ホーム画面 */
+.home-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 32px 24px;
+  background: linear-gradient(180deg, var(--color-navy) 0%, var(--color-bg) 100%);
+}
+
+.home-logo {
+  text-align: center;
+}
+
+.title-main {
+  font-size: 42px;
+  color: var(--color-gold);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  letter-spacing: 8px;
+}
+
+.title-sub {
+  font-size: 20px;
+  color: var(--color-cream);
+  letter-spacing: 4px;
+  margin-top: 8px;
+}
+
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 280px;
+}
+
+/* カード */
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 13px;
+  color: var(--color-gold);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ボタン */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-main);
+  font-size: 15px;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity var(--transition), transform var(--transition);
+  min-height: 44px;
+}
+
+.btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--color-red);
+  color: var(--color-cream);
+  border: 2px solid var(--color-gold);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-red-light);
+}
+
+.btn-secondary {
+  background-color: var(--color-navy);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-gold);
+}
+
+.btn-danger {
+  background-color: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.btn-large {
+  font-size: 16px;
+  padding: 16px;
+}
+
+.btn-small {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.btn-back {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  color: var(--color-gold);
+  border: 1px solid var(--color-border);
+  font-size: 18px;
+}
+
+.btn-nav {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.btn-nav:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+/* ダッシュボード */
+.basho-info {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-label {
+  font-size: 11px;
+  color: var(--color-text-sub);
+}
+
+.status-value {
+  font-size: 16px;
+  color: var(--color-cream);
+}
+
+.dashboard-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* 力士リスト */
+.wrestler-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wrestler-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.wrestler-card:hover {
+  border-color: var(--color-gold);
+}
+
+.wrestler-card-icon {
+  width: 44px;
+  height: 44px;
+  background-color: var(--color-navy);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.wrestler-card-info {
+  flex: 1;
+}
+
+.wrestler-card-name {
+  font-size: 16px;
+  color: var(--color-cream);
+}
+
+.wrestler-card-details {
+  font-size: 11px;
+  color: var(--color-text-sub);
+  margin-top: 2px;
+}
+
+.wrestler-card-record {
+  font-size: 13px;
+  color: var(--color-text-sub);
+}
+
+/* 力士詳細 */
+.wrestler-profile {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.wrestler-visual {
+  width: 80px;
+  height: 80px;
+  background-color: var(--color-navy);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wrestler-icon {
+  font-size: 36px;
+  color: var(--color-gold);
+}
+
+.wrestler-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wrestler-rank {
+  font-size: 18px;
+  color: var(--color-gold);
+}
+
+.wrestler-age,
+.wrestler-origin,
+.wrestler-style {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+/* 能力値バー */
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-sub);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.stat-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background-color: var(--color-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.stat-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-red), var(--color-gold));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.stat-num {
+  font-size: 12px;
+  color: var(--color-text);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.potential-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.potential-rank {
+  font-size: 20px;
+  color: var(--color-gold);
+  font-weight: bold;
+}
+
+/* 成績 */
+.record-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.record-row:last-child {
+  border-bottom: none;
+}
+
+/* フォーム */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-size: 13px;
+  color: var(--color-text-sub);
+}
+
+.text-input,
+.select-input {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-main);
+  font-size: 15px;
+  min-height: 44px;
+}
+
+.text-input:focus,
+.select-input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+
+.select-input option {
+  background-color: var(--color-bg-card);
+}
+
+/* 設備 */
+.facility-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.facility-info h3 {
+  font-size: 15px;
+  color: var(--color-cream);
+}
+
+.facility-level {
+  font-size: 12px;
+  color: var(--color-gold);
+}
+
+.facility-desc {
+  font-size: 11px;
+  color: var(--color-text-sub);
+  margin-top: 4px;
+}
+
+/* 本場所 */
+.match-card {
+  text-align: center;
+}
+
+.match-wrestlers {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px 0;
+}
+
+.match-wrestler {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.match-wrestler-name {
+  font-size: 16px;
+  color: var(--color-cream);
+}
+
+.match-wrestler-rank {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+.match-vs {
+  font-size: 18px;
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.match-result {
+  padding: 12px;
+  font-size: 16px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+}
+
+.match-result.win {
+  color: var(--color-win);
+}
+
+.match-result.lose {
+  color: var(--color-lose);
+}
+
+.basho-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.basho-day {
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+/* 星取表 */
+.hoshitori {
+  font-size: 13px;
+}
+
+.hoshitori-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hoshitori-name {
+  width: 80px;
+  font-size: 12px;
+  color: var(--color-cream);
+}
+
+.hoshitori-stars {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.star {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.star.win {
+  background-color: var(--color-win);
+  color: #000;
+}
+
+.star.lose {
+  background-color: #444;
+  color: var(--color-text-sub);
+}
+
+.star.pending {
+  background-color: var(--color-border);
+}
+
+/* 場所結果 */
+.result-list,
+.rank-changes,
+.growth-list,
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-item,
+.rank-item,
+.growth-item,
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.result-item:last-child,
+.rank-item:last-child,
+.growth-item:last-child,
+.history-item:last-child {
+  border-bottom: none;
+}
+
+/* イベント */
+.event-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-text);
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ダイアログ */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.dialog-overlay.hidden {
+  display: none;
+}
+
+.dialog {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.dialog-message {
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.8;
+}
+
+.dialog-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.dialog-buttons .btn {
+  flex: 1;
+}
+
+/* トースト通知 */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-navy);
+  border: 1px solid var(--color-gold);
+  color: var(--color-text);
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  z-index: 200;
+  max-width: 320px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.toast.hidden {
+  display: none;
+}
+
+/* テキスト */
+.info-text {
+  font-size: 13px;
+  color: var(--color-text-sub);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+/* ユーティリティ */
+.hidden {
+  display: none !important;
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+.text-win {
+  color: var(--color-win);
+}
+
+.text-lose {
+  color: var(--color-lose);
+}

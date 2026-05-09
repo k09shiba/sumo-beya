@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a2744">
+  <title>相撲部屋育成ゲーム</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ホーム画面 -->
+  <section id="home-screen" class="screen active">
+    <div class="home-container">
+      <div class="home-logo">
+        <h1 class="title-main">相撲部屋</h1>
+        <h2 class="title-sub">育成ゲーム</h2>
+      </div>
+      <div class="home-buttons">
+        <button id="btn-new-game" class="btn btn-primary btn-large">新規開始</button>
+        <button id="btn-continue" class="btn btn-secondary btn-large" disabled>続きから</button>
+        <button id="btn-reset" class="btn btn-danger btn-small">データ初期化</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 部屋名入力画面 -->
+  <section id="stable-name-screen" class="screen">
+    <div class="screen-header">
+      <h2>部屋の名前を決めてください</h2>
+    </div>
+    <div class="screen-content">
+      <div class="form-group">
+        <label for="stable-name-input">部屋名</label>
+        <input type="text" id="stable-name-input" class="text-input" placeholder="例：花ノ山部屋" maxlength="20">
+      </div>
+      <button id="btn-start-game" class="btn btn-primary btn-large">この部屋を開く</button>
+    </div>
+  </section>
+
+  <!-- 部屋ダッシュボード -->
+  <section id="dashboard-screen" class="screen">
+    <div class="screen-header">
+      <h2 id="dashboard-stable-name">〇〇部屋</h2>
+      <div class="basho-info" id="dashboard-basho-info">2024年 初場所</div>
+    </div>
+    <div class="screen-content">
+      <!-- 部屋ステータス -->
+      <div class="card">
+        <h3 class="card-title">部屋の状況</h3>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">名声</span>
+            <span class="status-value" id="dashboard-reputation">0</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">資金</span>
+            <span class="status-value" id="dashboard-funds">1,000万円</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">後援会</span>
+            <span class="status-value" id="dashboard-supporters">0人</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">設備</span>
+            <span class="status-value" id="dashboard-facility">Lv.1</span>
+          </div>
+        </div>
+      </div>
+      <!-- 力士ステータス -->
+      <div class="card">
+        <h3 class="card-title">力士の状況</h3>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">在籍数</span>
+            <span class="status-value" id="dashboard-wrestler-count">0人</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">関取</span>
+            <span class="status-value" id="dashboard-sekitori-count">0人</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">最高位</span>
+            <span class="status-value" id="dashboard-top-rank">序ノ口</span>
+          </div>
+        </div>
+      </div>
+      <!-- ナビゲーション -->
+      <nav class="dashboard-nav">
+        <button class="btn btn-nav" data-screen="wrestler-list-screen">力士一覧</button>
+        <button class="btn btn-nav" data-screen="scout-screen">スカウト</button>
+        <button class="btn btn-nav" data-screen="facility-screen">設備管理</button>
+        <button class="btn btn-nav" data-screen="supporter-screen">後援会</button>
+        <button class="btn btn-nav" data-screen="history-screen">部屋の歴史</button>
+      </nav>
+      <button id="btn-start-basho" class="btn btn-primary btn-large">場所へ出陣</button>
+    </div>
+  </section>
+
+  <!-- 力士一覧画面 -->
+  <section id="wrestler-list-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="dashboard-screen">←</button>
+      <h2>力士一覧</h2>
+    </div>
+    <div class="screen-content">
+      <div id="wrestler-list" class="wrestler-list">
+        <!-- wrestler.jsが動的に生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 力士詳細画面 -->
+  <section id="wrestler-detail-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="wrestler-list-screen">←</button>
+      <h2 id="detail-wrestler-name">力士名</h2>
+    </div>
+    <div class="screen-content">
+      <!-- 基本情報 -->
+      <div class="card wrestler-profile">
+        <div class="wrestler-visual" id="detail-visual">
+          <div class="wrestler-icon">力</div>
+        </div>
+        <div class="wrestler-info">
+          <div class="wrestler-rank" id="detail-rank">序ノ口</div>
+          <div class="wrestler-age" id="detail-age">18歳</div>
+          <div class="wrestler-origin" id="detail-origin">東京都出身</div>
+          <div class="wrestler-style" id="detail-style">四つ相撲 / 中型</div>
+        </div>
+      </div>
+      <!-- 能力値 -->
+      <div class="card">
+        <h3 class="card-title">能力値</h3>
+        <div class="stats-container" id="detail-stats">
+          <div class="stat-row">
+            <span class="stat-label">体力</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" id="stat-stamina"></div></div>
+            <span class="stat-num" id="stat-stamina-num">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">筋力</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" id="stat-strength"></div></div>
+            <span class="stat-num" id="stat-strength-num">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">技</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" id="stat-technique"></div></div>
+            <span class="stat-num" id="stat-technique-num">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">精神</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" id="stat-mental"></div></div>
+            <span class="stat-num" id="stat-mental-num">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">体重</span>
+            <div class="stat-bar-wrap"><div class="stat-bar" id="stat-weight"></div></div>
+            <span class="stat-num" id="stat-weight-num">0kg</span>
+          </div>
+        </div>
+        <div class="potential-row">
+          <span class="stat-label">伸びしろ</span>
+          <span class="potential-rank" id="detail-potential">B</span>
+        </div>
+      </div>
+      <!-- 成績 -->
+      <div class="card">
+        <h3 class="card-title">成績</h3>
+        <div class="record-row">
+          <span>通算</span>
+          <span id="detail-career-record">0勝0敗</span>
+        </div>
+        <div class="record-row">
+          <span>今場所</span>
+          <span id="detail-basho-record">0勝0敗</span>
+        </div>
+        <div class="record-row">
+          <span>最高位</span>
+          <span id="detail-highest-rank">序ノ口</span>
+        </div>
+      </div>
+      <!-- 食事方針 -->
+      <div class="card">
+        <h3 class="card-title">食事方針</h3>
+        <select id="detail-diet-policy" class="select-input">
+          <option value="標準食">標準食</option>
+          <option value="増量食">増量食</option>
+          <option value="絞り食">絞り食</option>
+        </select>
+      </div>
+      <!-- 引退ボタン -->
+      <button id="btn-retire-wrestler" class="btn btn-danger">引退させる</button>
+    </div>
+  </section>
+
+  <!-- スカウト画面 -->
+  <section id="scout-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="dashboard-screen">←</button>
+      <h2>スカウト</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card">
+        <p class="info-text">有望な若者を探して入門を勧誘しましょう。</p>
+        <button id="btn-scout-search" class="btn btn-secondary">スカウトに出向く（10万円）</button>
+      </div>
+      <div id="scout-list" class="wrestler-list">
+        <!-- 候補力士リスト（動的生成）-->
+      </div>
+    </div>
+  </section>
+
+  <!-- 設備管理画面 -->
+  <section id="facility-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="dashboard-screen">←</button>
+      <h2>設備管理</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card facility-item" id="facility-training-hall">
+        <div class="facility-info">
+          <h3>稽古場</h3>
+          <p class="facility-level" id="facility-training-level">Lv.1</p>
+          <p class="facility-desc">力士の稽古効果が上がる</p>
+        </div>
+        <button class="btn btn-secondary btn-small" data-facility="trainingHall">強化</button>
+      </div>
+      <div class="card facility-item" id="facility-chanko-hall">
+        <div class="facility-info">
+          <h3>ちゃんこ場</h3>
+          <p class="facility-level" id="facility-chanko-level">Lv.1</p>
+          <p class="facility-desc">食事方針の効果が向上する</p>
+        </div>
+        <button class="btn btn-secondary btn-small" data-facility="chankoHall">強化</button>
+      </div>
+      <div class="card facility-item" id="facility-dormitory">
+        <div class="facility-info">
+          <h3>宿舎</h3>
+          <p class="facility-level" id="facility-dormitory-level">Lv.1</p>
+          <p class="facility-desc">回復速度と精神力に好影響</p>
+        </div>
+        <button class="btn btn-secondary btn-small" data-facility="dormitory">強化</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 後援会管理画面 -->
+  <section id="supporter-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="dashboard-screen">←</button>
+      <h2>後援会</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card">
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">会員数</span>
+            <span class="status-value" id="supporter-count">0人</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">月収入</span>
+            <span class="status-value" id="supporter-income">0万円</span>
+          </div>
+        </div>
+      </div>
+      <div id="supporter-events" class="event-list">
+        <!-- 後援会イベント（動的生成）-->
+      </div>
+    </div>
+  </section>
+
+  <!-- 部屋の歴史画面 -->
+  <section id="history-screen" class="screen">
+    <div class="screen-header">
+      <button class="btn btn-back" data-back="dashboard-screen">←</button>
+      <h2>部屋の歴史</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card">
+        <h3 class="card-title">歴代力士</h3>
+        <div id="history-alumni-list" class="history-list">
+          <!-- OBリスト（動的生成）-->
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">場所成績</h3>
+        <div id="history-basho-list" class="history-list">
+          <!-- 場所成績（動的生成）-->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 場所間イベント画面 -->
+  <section id="event-screen" class="screen">
+    <div class="screen-header">
+      <h2 id="event-title">イベント</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card">
+        <p id="event-description" class="event-text"></p>
+      </div>
+      <div id="event-choices" class="choice-list">
+        <!-- 選択肢（動的生成）-->
+      </div>
+    </div>
+  </section>
+
+  <!-- 本場所画面 -->
+  <section id="basho-screen" class="screen">
+    <div class="screen-header">
+      <h2 id="basho-title">初場所</h2>
+      <div id="basho-day" class="basho-day">初日</div>
+    </div>
+    <div class="screen-content">
+      <!-- 取組カード -->
+      <div class="card match-card" id="current-match">
+        <div class="match-wrestlers">
+          <div class="match-wrestler player-side">
+            <div class="match-wrestler-name" id="match-player-name">―</div>
+            <div class="match-wrestler-rank" id="match-player-rank">―</div>
+          </div>
+          <div class="match-vs">対</div>
+          <div class="match-wrestler opponent-side">
+            <div class="match-wrestler-name" id="match-opponent-name">―</div>
+            <div class="match-wrestler-rank" id="match-opponent-rank">―</div>
+          </div>
+        </div>
+        <div id="match-result" class="match-result hidden"></div>
+      </div>
+      <!-- 星取表 -->
+      <div class="card">
+        <h3 class="card-title">星取表</h3>
+        <div id="hoshitori" class="hoshitori">
+          <!-- 動的生成 -->
+        </div>
+      </div>
+      <div class="basho-controls">
+        <button id="btn-do-match" class="btn btn-primary btn-large">取組</button>
+        <button id="btn-skip-day" class="btn btn-secondary" style="display:none">この日を進める</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 場所結果サマリー画面 -->
+  <section id="result-screen" class="screen">
+    <div class="screen-header">
+      <h2 id="result-title">場所結果</h2>
+    </div>
+    <div class="screen-content">
+      <div class="card">
+        <h3 class="card-title">今場所の成績</h3>
+        <div id="result-list" class="result-list">
+          <!-- 動的生成 -->
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">番付変動</h3>
+        <div id="rank-changes" class="rank-changes">
+          <!-- 動的生成 -->
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">成長</h3>
+        <div id="growth-list" class="growth-list">
+          <!-- 動的生成 -->
+        </div>
+      </div>
+      <button id="btn-next-basho" class="btn btn-primary btn-large">次の場所へ</button>
+    </div>
+  </section>
+
+  <!-- 確認ダイアログ -->
+  <div id="confirm-dialog" class="dialog-overlay hidden">
+    <div class="dialog">
+      <p id="confirm-message" class="dialog-message"></p>
+      <div class="dialog-buttons">
+        <button id="confirm-yes" class="btn btn-danger">はい</button>
+        <button id="confirm-no" class="btn btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/save.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/wrestler.js"></script>
+  <script src="js/tournament.js"></script>
+  <script src="js/stable.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
