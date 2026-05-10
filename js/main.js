@@ -73,10 +73,8 @@ function updateDashboard() {
   document.getElementById('dashboard-sekitori-count').textContent = `${getSekitori().length}人`;
   const topRank = getTopRank();
   const topRankEl = document.getElementById('dashboard-top-rank');
-  topRankEl.textContent = topRank;
-  topRankEl.style.color = getRankColor(active.length
-    ? active.reduce((p, c) => c.rankIndex > p.rankIndex ? c : p).rankIndex
-    : 0);
+  topRankEl.textContent = formatRank(topRank);
+  topRankEl.style.color = getRankColor(topRank);
   document.getElementById('dashboard-next-basho').textContent =
     `${nb.year}年${nb.month}月 ${nb.name}`;
 
@@ -103,16 +101,16 @@ function renderDashboardWrestlers() {
   }
 
   // 番付の高い順にソート
-  const sorted = [...active].sort((a, b) => b.rankIndex - a.rankIndex);
+  const sorted = [...active].sort((a, b) => compareRanks(b.rank, a.rank));
 
   lineup.innerHTML = sorted.map(w => {
     const pv         = getPhysiqueVisual(w.physique);
-    const rankColor  = getRankColor(w.rankIndex);
+    const rankColor  = getRankColor(w.rank);
     return `
       <div class="lineup-card" data-id="${w.id}">
         <div class="lineup-icon" style="color:${pv.color}; border-color:${rankColor}">${pv.char}</div>
         <div class="lineup-name">${w.name}</div>
-        <div class="lineup-rank" style="color:${rankColor}">${w.rank}</div>
+        <div class="lineup-rank" style="color:${rankColor}">${formatRank(w.rank)}</div>
       </div>
     `;
   }).join('');
@@ -136,7 +134,7 @@ function updateWrestlerList() {
     return;
   }
   // 番付の高い順にソート
-  const sorted = [...active].sort((a, b) => b.rankIndex - a.rankIndex);
+  const sorted = [...active].sort((a, b) => compareRanks(b.rank, a.rank));
   list.innerHTML = sorted.map(w => renderWrestlerCard(w)).join('');
   // カードタップで詳細に遷移
   list.querySelectorAll('.wrestler-card').forEach(card => {
@@ -150,7 +148,7 @@ function updateWrestlerList() {
 
 // 力士詳細画面を表示する
 function showWrestlerDetail(wrestler) {
-  const rankColor   = getRankColor(wrestler.rankIndex);
+  const rankColor   = getRankColor(wrestler.rank);
   const physVisual  = getPhysiqueVisual(wrestler.physique);
   const potColor    = getPotentialColor(wrestler.potential);
 
@@ -163,7 +161,7 @@ function showWrestlerDetail(wrestler) {
 
   // 番付（ランク色付き）
   const rankEl = document.getElementById('detail-rank');
-  rankEl.textContent = wrestler.rank;
+  rankEl.textContent = formatRank(wrestler.rank);
   rankEl.style.color = rankColor;
 
   document.getElementById('detail-age').textContent = `${wrestler.age}歳`;
@@ -197,8 +195,8 @@ function showWrestlerDetail(wrestler) {
     `${wrestler.bashoRecord.wins}勝${wrestler.bashoRecord.losses}敗`;
 
   const highestRankEl = document.getElementById('detail-highest-rank');
-  highestRankEl.textContent = wrestler.highestRank;
-  highestRankEl.style.color = getRankColor(wrestler.highestRankIndex || 0);
+  highestRankEl.textContent = formatRank(wrestler.highestRank);
+  highestRankEl.style.color = getRankColor(wrestler.highestRank);
 
   // プロフィール詳細
   document.getElementById('detail-origin-detail').textContent =
@@ -451,8 +449,7 @@ function init() {
   document.getElementById('btn-start-basho').addEventListener('click', () => {
     if (!gameState) return;
     if (gameState.phase === 'basho') {
-      // フェーズ5実装済みになったら本場所画面へ
-      showToast('本場所システムは準備中です（フェーズ5）');
+      startBasho();
       return;
     }
     startInterBashoPhase();
@@ -524,13 +521,13 @@ function renderTrainingEvent() {
   const listEl = document.getElementById('wrestler-training-list');
   listEl.innerHTML = active.map(w => {
     const a         = trainingAssigns[w.id];
-    const rankColor = getRankColor(w.rankIndex);
+    const rankColor = getRankColor(w.rank);
     const showJiyu  = a.type === '自主トレ';
     return `
       <div class="wrestler-training-row card" data-id="${w.id}">
         <div class="training-wrestler-info">
           <span class="training-wrestler-name" style="color:${rankColor}">${w.name}</span>
-          <span class="training-wrestler-sub">${w.rank} | ${w.style} | ${w.physique}</span>
+          <span class="training-wrestler-sub">${formatRank(w.rank)} | ${w.style} | ${w.physique}</span>
         </div>
         <div class="training-selects">
           <select class="select-input select-sm training-type-select" data-id="${w.id}">
@@ -578,7 +575,7 @@ function executeTraining() {
   active.forEach(w => {
     const a      = trainingAssigns[w.id] || { type: '基礎稽古', jiyuTarget: 'stamina' };
     const result = applyTraining(w, a.type, a.jiyuTarget);
-    results.push({ name: w.name, type: a.type, rankIndex: w.rankIndex, ...result });
+    results.push({ name: w.name, type: a.type, rank: w.rank, ...result });
   });
 
   saveState();
@@ -586,7 +583,7 @@ function executeTraining() {
   // 結果描画
   const contentEl = document.getElementById('training-result-content');
   contentEl.innerHTML = results.map(r => {
-    const color = getRankColor(r.rankIndex);
+    const color = getRankColor(r.rank);
     const msgs  = r.messages.join(' / ');
     return `
       <div class="training-result-wrestler">
@@ -673,10 +670,7 @@ function showInterBashoComplete() {
 
   document.getElementById('btn-go-to-basho').addEventListener('click', () => {
     setPhase('basho');
-    updateDashboard();
-    // フェーズ5で basho-screen に遷移する
-    showToast('本場所システムは準備中です（フェーズ5）');
-    showScreen('dashboard-screen');
+    startBasho();
   });
 }
 
@@ -705,6 +699,231 @@ function setupEventScreenListeners() {
     interBashoIndex++;
     showCurrentEvent();
   });
+}
+
+// ============================================================
+// 本場所フェーズ
+// ============================================================
+
+// 本場所を開始または再開する
+function startBasho() {
+  if (!gameState.bashoState || gameState.bashoState.completed) {
+    initBasho();
+  }
+  updateDashboard();
+  renderBashoScreen();
+  showScreen('basho-screen');
+}
+
+// 本場所画面を描画する
+function renderBashoScreen() {
+  const bs = gameState.bashoState;
+  if (!bs) return;
+
+  const nb = getNextBashoInfo();
+  document.getElementById('basho-title').textContent =
+    `${nb.year}年${nb.month}月 ${getCurrentBashoName()}`;
+  document.getElementById('basho-day').textContent = `${bs.day}日目`;
+
+  const titleEl = document.getElementById('today-matches-title');
+  if (titleEl) titleEl.textContent = `${bs.day}日目の取組`;
+
+  renderTodayMatches();
+  renderHoshitori();
+  setupBashoButton();
+}
+
+// 今日の取組カードを描画する
+function renderTodayMatches() {
+  const bs  = gameState.bashoState;
+  if (!bs) return;
+
+  const day       = bs.day;
+  const container = document.getElementById('today-matches-list');
+  const active    = getActiveWrestlers();
+
+  // 今日予定がある力士を取得する
+  const todayEntries = active
+    .map(w => {
+      const sched = bs.schedule[w.id];
+      if (!sched) return null;
+      const match = sched.find(m => m.day === day);
+      return match ? { w, match } : null;
+    })
+    .filter(Boolean);
+
+  if (todayEntries.length === 0) {
+    container.innerHTML = `<p class="info-text">${day}日目は全員休場です</p>`;
+    return;
+  }
+
+  container.innerHTML = todayEntries.map(({ w, match }) => {
+    const rankColor = getRankColor(w.rank);
+    if (match.result) {
+      const { win, kimarite } = match.result;
+      const cls  = win ? 'match-win' : 'match-loss';
+      const mark = win ? '○' : '●';
+      return `
+        <div class="match-row ${cls}">
+          <div class="match-athlete">
+            <span class="match-rank" style="color:${rankColor}">${formatRank(w.rank)}</span>
+            <span class="match-name">${w.name}</span>
+          </div>
+          <div class="match-result-mark">${mark}</div>
+          <div class="match-athlete match-opp">
+            <span class="match-rank">${formatRank(match.opponent.rank)}</span>
+            <span class="match-name">${match.opponent.name}</span>
+          </div>
+          <span class="match-kimarite">${kimarite}</span>
+        </div>
+      `;
+    }
+    return `
+      <div class="match-row">
+        <div class="match-athlete">
+          <span class="match-rank" style="color:${rankColor}">${formatRank(w.rank)}</span>
+          <span class="match-name">${w.name}</span>
+          <span class="match-rec">${w.bashoRecord.wins}勝${w.bashoRecord.losses}敗</span>
+        </div>
+        <div class="match-vs">対</div>
+        <div class="match-athlete match-opp">
+          <span class="match-rank">${formatRank(match.opponent.rank)}</span>
+          <span class="match-name">${match.opponent.name}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 星取表を描画する
+function renderHoshitori() {
+  const bs        = gameState.bashoState;
+  const container = document.getElementById('hoshitori');
+  if (!bs || !container) return;
+
+  const active = [...getActiveWrestlers()].sort((a, b) => compareRanks(b.rank, a.rank));
+
+  container.innerHTML = active.map(w => {
+    const sched     = bs.schedule[w.id] || [];
+    const rankColor = getRankColor(w.rank);
+
+    const stars = Array.from({ length: 15 }, (_, i) => {
+      const day   = i + 1;
+      const match = sched.find(m => m.day === day);
+      if (!match) return '<span class="star none">―</span>';
+      if (!match.result) return '<span class="star pending">・</span>';
+      return match.result.win
+        ? '<span class="star win">○</span>'
+        : '<span class="star lose">●</span>';
+    }).join('');
+
+    return `
+      <div class="hoshitori-row">
+        <div class="hoshitori-name" style="color:${rankColor}">${w.name}</div>
+        <div class="hoshitori-stars">${stars}</div>
+        <div class="hoshitori-record">${w.bashoRecord.wins}−${w.bashoRecord.losses}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 取組ボタンの状態を設定する
+function setupBashoButton() {
+  const btn = document.getElementById('btn-do-match');
+  if (!btn) return;
+
+  // onclick を上書きして毎回最新のハンドラに差し替える
+  if (isBashoComplete()) {
+    btn.textContent = '場所結果を見る';
+    btn.onclick = () => {
+      finalizeBasho();
+      showResultScreen();
+    };
+    return;
+  }
+
+  const bs  = gameState.bashoState;
+  const day = bs.day;
+  const active = getActiveWrestlers();
+
+  // 今日に試合があるかチェックする
+  const hasTodayMatch = active.some(w => {
+    const sched = bs.schedule[w.id];
+    return sched && sched.some(m => m.day === day);
+  });
+
+  if (!hasTodayMatch) {
+    btn.textContent = '翌日へ進む';
+    btn.onclick = () => {
+      advanceDay();
+      renderBashoScreen();
+    };
+    return;
+  }
+
+  // 今日の試合が全て完了しているかチェックする
+  const allDone = active.every(w => {
+    const sched = bs.schedule[w.id];
+    if (!sched) return true;
+    const todayMatch = sched.find(m => m.day === day);
+    return !todayMatch || todayMatch.result !== null;
+  });
+
+  if (allDone) {
+    btn.textContent = isBashoComplete() ? '場所結果を見る' : '翌日へ進む';
+    btn.onclick = () => {
+      if (isBashoComplete()) {
+        finalizeBasho();
+        showResultScreen();
+      } else {
+        advanceDay();
+        renderBashoScreen();
+      }
+    };
+  } else {
+    btn.textContent = '取組を行う';
+    btn.onclick = () => {
+      executeDayMatches();
+      renderTodayMatches();
+      renderHoshitori();
+      setupBashoButton();
+    };
+  }
+}
+
+// 場所結果画面を表示する
+function showResultScreen() {
+  const active  = getActiveWrestlers();
+  const sorted  = [...active].sort((a, b) => compareRanks(b.rank, a.rank));
+  const nb      = getNextBashoInfo();
+
+  document.getElementById('result-title').textContent =
+    `${nb.year}年${nb.month}月 ${getCurrentBashoName()} 結果`;
+
+  document.getElementById('result-list').innerHTML = sorted.map(w => {
+    const rankColor = getRankColor(w.rank);
+    const cls       = w.bashoRecord.wins >= w.bashoRecord.losses ? 'kachi' : 'make';
+    return `
+      <div class="result-item ${cls}">
+        <span class="result-rank" style="color:${rankColor}">${formatRank(w.rank)}</span>
+        <span class="result-name">${w.name}</span>
+        <span class="result-record">${w.bashoRecord.wins}勝${w.bashoRecord.losses}敗</span>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('rank-changes').innerHTML =
+    '<p class="info-text">番付変動はフェーズ5Bで実装予定です</p>';
+  document.getElementById('growth-list').innerHTML =
+    '<p class="info-text">成長記録は今後実装予定です</p>';
+
+  document.getElementById('btn-next-basho').onclick = () => {
+    advanceToNextBasho();
+    updateDashboard();
+    showScreen('dashboard-screen');
+  };
+
+  showScreen('result-screen');
 }
 
 document.addEventListener('DOMContentLoaded', init);

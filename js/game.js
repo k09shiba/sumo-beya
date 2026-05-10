@@ -6,9 +6,6 @@ const RANKS = [
   '十両', '前頭', '小結', '関脇', '大関', '横綱'
 ];
 
-// 関取の番付インデックス（十両以上）
-const SEKITORI_RANK_INDEX = 4;
-
 // 場所名
 const BASHO_NAMES = ['初場所', '春場所', '夏場所', '名古屋場所', '秋場所', '九州場所'];
 
@@ -20,6 +17,53 @@ const BASHO_LOCATIONS = ['東京', '大阪', '東京', '名古屋', '東京', '�
 
 // フェーズの表示名
 const PHASE_NAMES = { training: '場所間', basho: '本場所', result: '場所結果' };
+
+// 階級の定義（低インデックスほど下位）
+const DIVISIONS = ['序ノ口', '序二段', '三段目', '幕下', '十両', '前頭', '小結', '関脇', '大関', '横綱'];
+
+// 関取の階級セット（十両以上）
+const SEKITORI_DIVISIONS = new Set(['十両', '前頭', '小結', '関脇', '大関', '横綱']);
+
+// 階級インデックスを返す（高いほど上位）
+function getDivisionIndex(division) {
+  const idx = DIVISIONS.indexOf(division);
+  return idx === -1 ? 0 : idx;
+}
+
+// rank オブジェクトを比較する（正の値 = a が上位）
+function compareRanks(a, b) {
+  const divDiff = getDivisionIndex(a.division) - getDivisionIndex(b.division);
+  if (divDiff !== 0) return divDiff;
+  const numDiff = (b.rankNumber || 0) - (a.rankNumber || 0);
+  if (numDiff !== 0) return numDiff;
+  return (a.side === '東' ? 1 : 0) - (b.side === '東' ? 1 : 0);
+}
+
+// rank オブジェクトを表示文字列に変換する
+function formatRank(rank) {
+  if (!rank || !rank.division) return '序ノ口';
+  const { division, rankNumber, side } = rank;
+  if (['横綱', '大関', '関脇', '小結'].includes(division)) return `${side}${division}`;
+  if (division === '前頭' && rankNumber === 1) return `${side}前頭`;
+  return `${side}${division}${rankNumber}枚目`;
+}
+
+// 力士が関取かどうかを返す
+function isSekitori(wrestler) {
+  return SEKITORI_DIVISIONS.has(wrestler.rank.division);
+}
+
+// セーブデータの rank フィールドを新形式に移行する
+function migrateRankIfNeeded(wrestler) {
+  if (typeof wrestler.rank === 'string') {
+    wrestler.rank = { division: wrestler.rank, rankNumber: 30, side: '東' };
+  }
+  if (typeof wrestler.highestRank === 'string') {
+    wrestler.highestRank = { division: wrestler.highestRank, rankNumber: 30, side: '東' };
+  }
+  delete wrestler.rankIndex;
+  delete wrestler.highestRankIndex;
+}
 
 // 現在のゲーム状態
 let gameState = null;
@@ -39,6 +83,7 @@ function resumeGame() {
   const saved = loadGame();
   if (!saved) return null;
   gameState = saved;
+  gameState.wrestlers.forEach(migrateRankIfNeeded);
   return gameState;
 }
 
@@ -78,17 +123,16 @@ function getActiveWrestlers() {
 
 // 関取（十両以上）を返す
 function getSekitori() {
-  return getActiveWrestlers().filter(w => w.rankIndex >= SEKITORI_RANK_INDEX);
+  return getActiveWrestlers().filter(w => isSekitori(w));
 }
 
-// 部屋の最高位番付を返す
+// 部屋の最高位番付（rank オブジェクト）を返す
 function getTopRank() {
   const active = getActiveWrestlers();
-  if (active.length === 0) return '序ノ口';
-  const top = active.reduce((prev, curr) =>
-    curr.rankIndex > prev.rankIndex ? curr : prev
-  );
-  return top.rank;
+  if (active.length === 0) return { division: '序ノ口', rankNumber: 30, side: '東' };
+  return active.reduce((prev, curr) =>
+    compareRanks(curr.rank, prev.rank) > 0 ? curr : prev
+  ).rank;
 }
 
 // 番付インデックスから番付名を返す

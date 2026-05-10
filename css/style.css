@@ -1142,6 +1142,125 @@ body {
   border: 2px solid var(--color-border);
 }
 
+/* ============================================================
+   本場所フェーズ（Phase 5A）
+   ============================================================ */
+
+/* 取組行 */
+.match-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.match-row:last-child {
+  border-bottom: none;
+}
+
+.match-row.match-win {
+  background-color: rgba(241, 196, 15, 0.05);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+}
+
+.match-row.match-loss {
+  background-color: rgba(136, 136, 136, 0.04);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+}
+
+.match-athlete {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.match-athlete.match-opp {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.match-rank {
+  font-size: 10px;
+  color: var(--color-text-sub);
+  white-space: nowrap;
+}
+
+.match-name {
+  font-size: 15px;
+  color: var(--color-cream);
+}
+
+.match-rec {
+  font-size: 11px;
+  color: var(--color-text-sub);
+}
+
+.match-result-mark {
+  font-size: 22px;
+  font-weight: bold;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.match-row.match-win .match-result-mark { color: var(--color-win); }
+.match-row.match-loss .match-result-mark { color: var(--color-lose); }
+
+.match-kimarite {
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-gold);
+  padding-top: 2px;
+}
+
+/* 星の追加スタイル（no-match, 未来分） */
+.star.none {
+  background-color: transparent;
+  color: var(--color-border);
+}
+
+.star.pending {
+  background-color: var(--color-border);
+  color: var(--color-text-sub);
+}
+
+/* 星取表の成績 */
+.hoshitori-record {
+  font-size: 11px;
+  color: var(--color-gold);
+  white-space: nowrap;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 場所結果 */
+.result-item.kachi .result-record { color: var(--color-win); }
+.result-item.make .result-record  { color: var(--color-lose); }
+
+.result-rank {
+  font-size: 11px;
+  width: 90px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.result-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.result-record {
+  font-size: 13px;
+  font-weight: bold;
+}
+
 /* ユーティリティ */
 .hidden {
   display: none !important;

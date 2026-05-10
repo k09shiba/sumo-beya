@@ -412,23 +412,15 @@
   <section id="basho-screen" class="screen">
     <div class="screen-header">
       <h2 id="basho-title">初場所</h2>
-      <div id="basho-day" class="basho-day">初日</div>
+      <div id="basho-day" class="basho-day">1日目</div>
     </div>
     <div class="screen-content">
-      <!-- 取組カード -->
-      <div class="card match-card" id="current-match">
-        <div class="match-wrestlers">
-          <div class="match-wrestler player-side">
-            <div class="match-wrestler-name" id="match-player-name">―</div>
-            <div class="match-wrestler-rank" id="match-player-rank">―</div>
-          </div>
-          <div class="match-vs">対</div>
-          <div class="match-wrestler opponent-side">
-            <div class="match-wrestler-name" id="match-opponent-name">―</div>
-            <div class="match-wrestler-rank" id="match-opponent-rank">―</div>
-          </div>
+      <!-- 本日の取組 -->
+      <div class="card">
+        <h3 class="card-title" id="today-matches-title">本日の取組</h3>
+        <div id="today-matches-list">
+          <!-- 動的生成 -->
         </div>
-        <div id="match-result" class="match-result hidden"></div>
       </div>
       <!-- 星取表 -->
       <div class="card">
@@ -438,8 +430,7 @@
         </div>
       </div>
       <div class="basho-controls">
-        <button id="btn-do-match" class="btn btn-primary btn-large">取組</button>
-        <button id="btn-skip-day" class="btn btn-secondary" style="display:none">この日を進める</button>
+        <button id="btn-do-match" class="btn btn-primary btn-large">取組を行う</button>
       </div>
     </div>
   </section>

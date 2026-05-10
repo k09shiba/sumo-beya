@@ -56,18 +56,18 @@ const PHYSIQUE_CHARS = {
   '超重量級': { char: '巨', color: '#c9a84c' }
 };
 
-// ランク階層の色
+// ランク階層の色（階級名をキーとする）
 const RANK_TIER_COLORS = {
-  0: '#666',    // 序ノ口
-  1: '#666',    // 序二段
-  2: '#666',    // 三段目
-  3: '#888',    // 幕下
-  4: '#56b4e9', // 十両（関取の壁）
-  5: '#e8e0d0', // 前頭
-  6: '#77dd77', // 小結
-  7: '#77dd77', // 関脇
-  8: '#e05555', // 大関
-  9: '#c9a84c'  // 横綱
+  '序ノ口': '#666',
+  '序二段': '#666',
+  '三段目': '#888',
+  '幕下':   '#aaa',
+  '十両':   '#56b4e9',
+  '前頭':   '#e8e0d0',
+  '小結':   '#77dd77',
+  '関脇':   '#77dd77',
+  '大関':   '#e05555',
+  '横綱':   '#c9a84c'
 };
 
 // 伸びしろランクの色
@@ -190,10 +190,8 @@ function createWrestler(overrides = {}) {
     stats,
     potential,
     hiddenInjuryResistance: randInt(30, 70),
-    rank:             '序ノ口',
-    rankIndex:        0,
-    highestRank:      '序ノ口',
-    highestRankIndex: 0,
+    rank:        { division: '序ノ口', rankNumber: randInt(25, 40), side: Math.random() < 0.5 ? '東' : '西' },
+    highestRank: { division: '序ノ口', rankNumber: randInt(25, 40), side: Math.random() < 0.5 ? '東' : '西' },
     careerRecord:  { wins: 0, losses: 0 },
     bashoRecord:   { wins: 0, losses: 0 },
     consecutiveLossBaschos: 0,
@@ -241,9 +239,11 @@ function getPhysiqueVisual(physique) {
   return PHYSIQUE_CHARS[physique] || PHYSIQUE_CHARS['中型'];
 }
 
-// ランクの色を返す
-function getRankColor(rankIndex) {
-  return RANK_TIER_COLORS[rankIndex] || RANK_TIER_COLORS[0];
+// ランクの色を返す（rank オブジェクトまたは階級名文字列を受け取る）
+function getRankColor(rank) {
+  if (!rank) return RANK_TIER_COLORS['序ノ口'];
+  const division = typeof rank === 'string' ? rank : rank.division;
+  return RANK_TIER_COLORS[division] || RANK_TIER_COLORS['序ノ口'];
 }
 
 // 伸びしろの色を返す
@@ -254,7 +254,7 @@ function getPotentialColor(potential) {
 // 力士カードのHTML文字列を生成する
 function renderWrestlerCard(wrestler) {
   const record     = `${wrestler.careerRecord.wins}勝${wrestler.careerRecord.losses}敗`;
-  const rankColor  = getRankColor(wrestler.rankIndex);
+  const rankColor  = getRankColor(wrestler.rank);
   const physVisual = getPhysiqueVisual(wrestler.physique);
 
   return `
@@ -264,7 +264,7 @@ function renderWrestlerCard(wrestler) {
       </div>
       <div class="wrestler-card-info">
         <div class="wrestler-card-name">${wrestler.name}</div>
-        <div class="wrestler-card-details" style="color:${rankColor}">${wrestler.rank}</div>
+        <div class="wrestler-card-details" style="color:${rankColor}">${formatRank(wrestler.rank)}</div>
         <div class="wrestler-card-details">${wrestler.age}歳 | ${wrestler.physique} | ${wrestler.style}</div>
       </div>
       <div class="wrestler-card-record">${record}</div>
