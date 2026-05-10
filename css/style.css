@@ -889,6 +889,157 @@ body {
   line-height: 1.6;
 }
 
+/* ============================================================
+   場所間フェーズ
+   ============================================================ */
+
+/* イベント進行インジケーター */
+.event-progress {
+  font-size: 11px;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+/* ランダムイベント選択肢 */
+.event-choice-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.event-choice-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  text-align: left;
+  border-radius: var(--radius);
+  min-height: 52px;
+}
+
+.choice-text {
+  font-size: 14px;
+  color: var(--color-cream);
+  font-family: var(--font-main);
+}
+
+.choice-desc {
+  font-size: 11px;
+  color: var(--color-gold);
+  font-family: var(--font-main);
+}
+
+.event-result-text {
+  font-size: 14px;
+  color: var(--color-cream);
+  margin-bottom: 6px;
+}
+
+.event-result-effect {
+  font-size: 13px;
+  color: var(--color-gold);
+}
+
+/* 稽古指示エリア（一括） */
+.batch-training-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 各力士の稽古行 */
+.wrestler-training-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.training-wrestler-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.training-wrestler-name {
+  display: block;
+  font-size: 15px;
+}
+
+.training-wrestler-sub {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-sub);
+  margin-top: 2px;
+}
+
+.training-selects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* 小サイズselectbox */
+.select-sm {
+  padding: 6px 8px;
+  font-size: 12px;
+  min-height: 36px;
+}
+
+/* 稽古結果 */
+.training-result-wrestler {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.training-result-wrestler:last-child {
+  border-bottom: none;
+}
+
+.training-result-name {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.training-result-type {
+  font-size: 11px;
+  color: var(--color-text-sub);
+}
+
+.training-result-msgs {
+  font-size: 12px;
+  color: var(--color-text);
+  line-height: 1.8;
+}
+
+/* 食事方針の結果 */
+.diet-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+
+.diet-result-row:last-child {
+  border-bottom: none;
+}
+
+.diet-result-name {
+  color: var(--color-cream);
+  flex-shrink: 0;
+}
+
+.diet-result-msgs {
+  color: var(--color-gold);
+  text-align: right;
+}
+
 /* 稽古指示 */
 .training-note {
   margin-bottom: 10px;

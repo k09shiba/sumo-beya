@@ -3,6 +3,13 @@
 // 現在表示中の画面ID
 let currentScreen = 'home-screen';
 
+// ============================================================
+// 場所間フェーズの状態（ローカル）
+// ============================================================
+let interBashoQueue  = []; // イベント配列
+let interBashoIndex  = 0;  // 現在のイベント番号
+let trainingAssigns  = {}; // wrestlerId -> { type, jiyuTarget }
+
 // 画面を切り替える
 function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -75,6 +82,14 @@ function updateDashboard() {
 
   // 力士ラインナップ
   renderDashboardWrestlers();
+
+  // 「場所へ出陣」ボタンのラベルをフェーズに応じて変える
+  const bashoBtn = document.getElementById('btn-start-basho');
+  if (gameState.phase === 'basho') {
+    bashoBtn.textContent = '本場所を続ける';
+  } else {
+    bashoBtn.textContent = '場所へ出陣';
+  }
 }
 
 // ダッシュボードの力士ラインナップを描画する
@@ -432,9 +447,263 @@ function init() {
     showToast(`${name}が誕生しました！`);
   });
 
-  // 場所へ出陣ボタン（フェーズ5で詳細実装）
+  // 場所へ出陣ボタン
   document.getElementById('btn-start-basho').addEventListener('click', () => {
+    if (!gameState) return;
+    if (gameState.phase === 'basho') {
+      // フェーズ5実装済みになったら本場所画面へ
+      showToast('本場所システムは準備中です（フェーズ5）');
+      return;
+    }
+    startInterBashoPhase();
+  });
+
+  // イベント画面の静的ボタンを設定する
+  setupEventScreenListeners();
+}
+
+// ============================================================
+// 場所間フェーズ
+// ============================================================
+
+// 場所間フェーズを開始する
+function startInterBashoPhase() {
+  setPhase('training');
+  interBashoQueue = generateInterBashoEvents();
+  interBashoIndex = 0;
+  trainingAssigns = {};
+  showScreen('event-screen');
+  showCurrentEvent();
+}
+
+// 現在のイベントを表示する
+function showCurrentEvent() {
+  if (interBashoIndex >= interBashoQueue.length) {
+    showInterBashoComplete();
+    return;
+  }
+
+  const event = interBashoQueue[interBashoIndex];
+
+  document.getElementById('event-title').textContent =
+    event.type === 'training' ? event.title : '場所間フェーズ';
+  document.getElementById('event-progress').textContent =
+    `${interBashoIndex + 1} / ${interBashoQueue.length}`;
+  document.getElementById('event-description').textContent = event.description;
+
+  // 全エリアをリセット
+  document.getElementById('training-area').classList.add('hidden');
+  document.getElementById('training-results').classList.add('hidden');
+  document.getElementById('event-complete-area').classList.add('hidden');
+  document.getElementById('event-choices').innerHTML = '';
+
+  if (event.type === 'training') {
+    renderTrainingEvent();
+  } else {
+    renderRandomEvent(event);
+  }
+}
+
+// ──────────────────────────────────────────
+// 稽古イベント
+// ──────────────────────────────────────────
+
+function renderTrainingEvent() {
+  const active = getActiveWrestlers();
+
+  // 未割り当ての力士に初期値をセット
+  active.forEach(w => {
+    if (!trainingAssigns[w.id]) {
+      trainingAssigns[w.id] = {
+        type:       w.autoMode ? getAutoTrainingType(w) : '基礎稽古',
+        jiyuTarget: 'stamina'
+      };
+    }
+  });
+
+  const listEl = document.getElementById('wrestler-training-list');
+  listEl.innerHTML = active.map(w => {
+    const a         = trainingAssigns[w.id];
+    const rankColor = getRankColor(w.rankIndex);
+    const showJiyu  = a.type === '自主トレ';
+    return `
+      <div class="wrestler-training-row card" data-id="${w.id}">
+        <div class="training-wrestler-info">
+          <span class="training-wrestler-name" style="color:${rankColor}">${w.name}</span>
+          <span class="training-wrestler-sub">${w.rank} | ${w.style} | ${w.physique}</span>
+        </div>
+        <div class="training-selects">
+          <select class="select-input select-sm training-type-select" data-id="${w.id}">
+            <option value="基礎稽古"     ${a.type==='基礎稽古'     ?'selected':''}>基礎稽古</option>
+            <option value="申し合い稽古" ${a.type==='申し合い稽古' ?'selected':''}>申し合い稽古</option>
+            <option value="ぶつかり稽古" ${a.type==='ぶつかり稽古' ?'selected':''}>ぶつかり稽古</option>
+            <option value="自主トレ"     ${a.type==='自主トレ'     ?'selected':''}>自主トレ</option>
+          </select>
+          <select class="select-input select-sm jiyu-target-select${showJiyu?'':' hidden'}" data-id="${w.id}">
+            <option value="stamina"   ${a.jiyuTarget==='stamina'   ?'selected':''}>体力</option>
+            <option value="strength"  ${a.jiyuTarget==='strength'  ?'selected':''}>筋力</option>
+            <option value="technique" ${a.jiyuTarget==='technique' ?'selected':''}>技</option>
+            <option value="mental"    ${a.jiyuTarget==='mental'    ?'selected':''}>精神</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('training-area').classList.remove('hidden');
+
+  // 種別変更 → 自主トレ用セレクトの表示切替
+  listEl.querySelectorAll('.training-type-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      trainingAssigns[sel.dataset.id].type = sel.value;
+      const row     = sel.closest('.wrestler-training-row');
+      const jiyuSel = row.querySelector('.jiyu-target-select');
+      jiyuSel.classList.toggle('hidden', sel.value !== '自主トレ');
+    });
+  });
+
+  // 自主トレ対象選択
+  listEl.querySelectorAll('.jiyu-target-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      trainingAssigns[sel.dataset.id].jiyuTarget = sel.value;
+    });
+  });
+}
+
+// 稽古を実施して結果を表示する
+function executeTraining() {
+  const active  = getActiveWrestlers();
+  const results = [];
+
+  active.forEach(w => {
+    const a      = trainingAssigns[w.id] || { type: '基礎稽古', jiyuTarget: 'stamina' };
+    const result = applyTraining(w, a.type, a.jiyuTarget);
+    results.push({ name: w.name, type: a.type, rankIndex: w.rankIndex, ...result });
+  });
+
+  saveState();
+
+  // 結果描画
+  const contentEl = document.getElementById('training-result-content');
+  contentEl.innerHTML = results.map(r => {
+    const color = getRankColor(r.rankIndex);
+    const msgs  = r.messages.join(' / ');
+    return `
+      <div class="training-result-wrestler">
+        <div class="training-result-name" style="color:${color}">${r.name}
+          <span class="training-result-type">（${r.type}）</span>
+        </div>
+        <div class="training-result-msgs">${msgs}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('training-area').classList.add('hidden');
+  document.getElementById('training-results').classList.remove('hidden');
+}
+
+// ──────────────────────────────────────────
+// ランダムイベント
+// ──────────────────────────────────────────
+
+function renderRandomEvent(event) {
+  document.getElementById('event-title').textContent = event.title;
+  const choicesEl = document.getElementById('event-choices');
+
+  choicesEl.innerHTML = event.choices.map((c, idx) => `
+    <div class="card event-choice-card">
+      <button class="btn btn-secondary event-choice-btn" data-idx="${idx}">
+        <span class="choice-text">${c.text}</span>
+        <span class="choice-desc">${c.desc}</span>
+      </button>
+    </div>
+  `).join('');
+
+  choicesEl.querySelectorAll('.event-choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const choice = event.choices[parseInt(btn.dataset.idx)];
+      applyEventEffect(choice.effect);
+      // 選択後：結果表示
+      choicesEl.innerHTML = `
+        <div class="card">
+          <p class="event-result-text">${choice.text}を選んだ。</p>
+          <p class="event-result-effect">${choice.desc}</p>
+        </div>
+        <button id="btn-next-random" class="btn btn-secondary btn-large">次へ進む</button>
+      `;
+      document.getElementById('btn-next-random').addEventListener('click', () => {
+        interBashoIndex++;
+        showCurrentEvent();
+      });
+      updateDashboard(); // 資金・名声などをダッシュボードに反映
+    });
+  });
+}
+
+// ──────────────────────────────────────────
+// 場所間フェーズ終了
+// ──────────────────────────────────────────
+
+function showInterBashoComplete() {
+  const dietResults = applyAllDietPolicies();
+
+  document.getElementById('event-title').textContent    = '場所間フェーズ終了';
+  document.getElementById('event-progress').textContent = '';
+  document.getElementById('event-description').textContent =
+    '全てのイベントが終了しました。弟子たちは本場所に向けて準備が整っています。';
+
+  // 食事方針の結果
+  let dietHTML = '';
+  if (dietResults.length > 0) {
+    dietHTML = `<div class="card">
+      <h3 class="card-title">食事方針の効果</h3>
+      ${dietResults.map(r =>
+        `<div class="diet-result-row">
+          <span class="diet-result-name">${r.name}</span>
+          <span class="diet-result-msgs">${r.messages.join(' / ')}</span>
+        </div>`
+      ).join('')}
+    </div>`;
+  }
+
+  const area = document.getElementById('event-complete-area');
+  area.innerHTML = dietHTML +
+    `<button id="btn-go-to-basho" class="btn btn-primary btn-large btn-basho">本場所へ出陣</button>`;
+  area.classList.remove('hidden');
+
+  document.getElementById('btn-go-to-basho').addEventListener('click', () => {
+    setPhase('basho');
+    updateDashboard();
+    // フェーズ5で basho-screen に遷移する
     showToast('本場所システムは準備中です（フェーズ5）');
+    showScreen('dashboard-screen');
+  });
+}
+
+// ──────────────────────────────────────────
+// 場所間フェーズの静的ボタンを設定する
+// ──────────────────────────────────────────
+
+function setupEventScreenListeners() {
+  // 一括指示
+  document.getElementById('btn-batch-apply').addEventListener('click', () => {
+    const type = document.getElementById('batch-training-select').value;
+    if (!type) return;
+    getActiveWrestlers().forEach(w => {
+      trainingAssigns[w.id] = { type, jiyuTarget: 'stamina' };
+    });
+    renderTrainingEvent();
+  });
+
+  // 稽古実施
+  document.getElementById('btn-execute-training').addEventListener('click', () => {
+    executeTraining();
+  });
+
+  // 稽古結果の「次へ」
+  document.getElementById('btn-after-training').addEventListener('click', () => {
+    interBashoIndex++;
+    showCurrentEvent();
   });
 }
 

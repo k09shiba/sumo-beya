@@ -363,15 +363,48 @@
   <!-- 場所間イベント画面 -->
   <section id="event-screen" class="screen">
     <div class="screen-header">
-      <h2 id="event-title">イベント</h2>
+      <h2 id="event-title">場所間フェーズ</h2>
+      <div class="event-progress" id="event-progress"></div>
     </div>
     <div class="screen-content">
+      <!-- イベント説明 -->
       <div class="card">
         <p id="event-description" class="event-text"></p>
       </div>
-      <div id="event-choices" class="choice-list">
-        <!-- 選択肢（動的生成）-->
+
+      <!-- 稽古指示エリア -->
+      <div id="training-area" class="hidden">
+        <div class="card">
+          <div class="batch-training-row">
+            <span class="status-label">一括指示</span>
+            <select class="select-input select-sm" id="batch-training-select">
+              <option value="">─ 種別を選ぶ ─</option>
+              <option value="基礎稽古">基礎稽古（体力・筋力）</option>
+              <option value="申し合い稽古">申し合い稽古（技・精神）</option>
+              <option value="ぶつかり稽古">ぶつかり稽古（筋力・精神 大）</option>
+              <option value="自主トレ">自主トレ（任意1能力）</option>
+            </select>
+            <button id="btn-batch-apply" class="btn btn-secondary btn-small">全員に適用</button>
+          </div>
+        </div>
+        <div id="wrestler-training-list" class="wrestler-list"></div>
+        <button id="btn-execute-training" class="btn btn-primary btn-large">稽古を実施する</button>
       </div>
+
+      <!-- 稽古結果エリア -->
+      <div id="training-results" class="hidden">
+        <div class="card">
+          <h3 class="card-title">稽古結果</h3>
+          <div id="training-result-content"></div>
+        </div>
+        <button id="btn-after-training" class="btn btn-secondary btn-large">次へ進む</button>
+      </div>
+
+      <!-- ランダムイベント選択肢 -->
+      <div id="event-choices" class="choice-list"></div>
+
+      <!-- 場所間フェーズ終了エリア -->
+      <div id="event-complete-area" class="hidden"></div>
     </div>
   </section>
 
